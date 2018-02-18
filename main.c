@@ -4,6 +4,8 @@
 #include "drv/ST7735/ST7735.h"
 #include "drv/ST7735/ST7735.h"
 #include "drv/adc/adc.h"
+#include "drv/BME280/i2c.h"
+#include "drv/BME280/bme280_support.h"
 #include "rtc.h"
 #include "weather_station_status.h"
 #include "gui/weather_station_ui.h"
@@ -59,6 +61,9 @@ int main(void)
     MCLKfreq=MAP_CS_getMCLK();  // get MCLK value
 
     init_ADC();
+    I2C_Init();
+
+    int32_t err = bme280_data_readout_template();
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
 
@@ -72,10 +77,10 @@ int main(void)
     struct weather_station_status status = (struct weather_station_status) {
         .lighting = lighting_dark,
         .outdoor_temperature = 0.0f,
-        .indoor_temperature = 70.0f,
-        .outdoor_humidity = 70.0f,
-        .indoor_humidity = 51.0f,
-        .pressure = 29.0f,
+        .indoor_temperature = 0.0f,
+        .outdoor_humidity = 0.0f,
+        .indoor_humidity = 0.0f,
+        .pressure = 0.0f,
         .time = (struct rtc_time) {
                 .sec = 0,
                 .min = 0,
@@ -99,13 +104,21 @@ int main(void)
         else if(light_reading < 10000) {lighting_index = 3;}
         else {lighting_index = 4;}
 
-        if(lighting_index != status.lighting)
-        {
+        //if(lighting_index != status.lighting)
+        //{
             status.lighting = lighting_index;
             draw_weather_station_ui(status);
-        }
+        //}
 
-        DelayWait10ms(10);
+        uint32_t pressure = 0;
+        int32_t temperature = 0;
+        uint32_t humidity = 0;
+        bme280_read_pressure_temperature_humidity(&pressure, &temperature, &humidity);
+        status.pressure = pressure * 0.0002953;
+        status.indoor_temperature = (temperature * 0.01) * (9.0 / 5.0) + 32.0;
+        status.indoor_humidity = humidity * (1.0 / 1024.0);
+
+        DelayWait10ms(100);
     }
 }
 

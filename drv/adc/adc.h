@@ -17,7 +17,7 @@ struct ADC
 {
     struct
     {
-        int input_id
+        int input_id;
         bool is_high_range;
     } config[ADC_NUM_CHANNELS];
     int16_t result[ADC_NUM_CHANNELS];

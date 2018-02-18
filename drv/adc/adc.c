@@ -9,7 +9,6 @@
 
 #include "driverlib.h"
 
-#include "../gpio/gpio.h"
 #include "adc.h"
 
 
@@ -21,6 +20,8 @@
 
 volatile struct ADC ADC;
 
+
+struct gpio_pin {uint16_t port; uint16_t pin;};
 
 static struct gpio_pin pins[24] =
 {
@@ -68,7 +69,6 @@ void init_ADC()
     {
         int input_id = ADC.config[i].input_id;
 
-        reserve_pin(pins[input_id]);
         MAP_GPIO_setAsPeripheralModuleFunctionInputPin(
                 pins[input_id].port,
                 pins[input_id].pin,
@@ -84,7 +84,7 @@ void init_ADC()
         MAP_ADC14_configureConversionMemory(
                 ADC_MEM(i),
                 ADC.config[i].is_high_range?
-                        ADC_VERFPOS_AVCC_VREFNEG_VSS
+                        ADC_VREFPOS_AVCC_VREFNEG_VSS
                         : ADC_VREFPOS_INTBUF_VREFNEG_VSS,
                 ADC_INPUT_A(i), false);
     }

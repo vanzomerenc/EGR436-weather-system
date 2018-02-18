@@ -30,7 +30,7 @@ int draw_weather_station_ui(struct weather_station_status status)
     //   only update parts of status which have changed,
     //   to avoid display flickering
 
-    ST7735_FillScreen(0);
+    //ST7735_FillScreen(0);
 
     gui_draw(LIGHTING_ICON_POS, images[status.lighting]);
     GUI_PRINT_FORMATTED(TIME_TEXT_POS, "%02d:%02d", status.time.hour, status.time.min);
