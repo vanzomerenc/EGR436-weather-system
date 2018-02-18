@@ -11,7 +11,7 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
-
+//hello
 volatile int MCLKfreq, SMCLKfreq;
 
 void clockInit48MHzXTL(void) {  // sets the clock module to use the external 48 MHz crystal
