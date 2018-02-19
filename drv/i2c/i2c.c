@@ -8,10 +8,10 @@
 //
 // modified by RWB 2/9/2018
 
+#include <drv/i2c/i2c.h>
 #include <stdint.h>
 #include "msp.h"
 
-#include "i2c.h"
 
 /* configure UCB1 as I2C */
 void I2C_Init(void) {
