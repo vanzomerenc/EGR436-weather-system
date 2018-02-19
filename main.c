@@ -62,17 +62,17 @@ int main(void)
 
     init_ADC();
     I2C_Init();
+    rtc_init(); // prelab 7
 
     int32_t err = bme280_data_readout_template();
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
 
     // initialize button
-
     MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1 | GPIO_PIN4);
 
-
     ST7735_FillScreen(0);
+
 
     struct weather_station_status status = (struct weather_station_status) {
         .lighting = lighting_dark,
@@ -90,6 +90,9 @@ int main(void)
                 .year = 2018
             }
     };
+
+    // TODO testing that we can set the RTC registers
+
 
     int lighting_index = 0;
     while(1) {  // loop through the test functions to demonstrate the LCD capabilities
@@ -117,6 +120,9 @@ int main(void)
         status.pressure = pressure * 0.0002953;
         status.indoor_temperature = (temperature * 0.01) * (9.0 / 5.0) + 32.0;
         status.indoor_humidity = humidity * (1.0 / 1024.0);
+
+        // RTC Functions (Prelab 7)
+        rtc_gettime(&status.time);
 
         DelayWait10ms(100);
     }
