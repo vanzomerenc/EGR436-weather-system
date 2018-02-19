@@ -61,6 +61,11 @@ int main(void)
     MCLKfreq=MAP_CS_getMCLK();  // get MCLK value
 
     init_ADC();
+
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN6);
+    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN6);
+    DelayWait10ms(100);
+
     I2C_Init();
 
     int32_t err = bme280_data_readout_template();
