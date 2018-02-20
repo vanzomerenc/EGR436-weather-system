@@ -94,10 +94,10 @@ int main(void)
             }
     };
 
-    printf("Press # to set the time.\n");
+    printf("Press enter to set the time.\n");
     struct rtc_time timeToEnter;
     // TODO testing that we can set the RTC registers
-    rtc_settime(&status.time);
+    //rtc_settime(&status.time);
 
     int lighting_index = 0;
     while(1) {  // loop through the test functions to demonstrate the LCD capabilities

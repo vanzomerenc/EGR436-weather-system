@@ -48,12 +48,12 @@ void EusciA0_ISR(void)
     int receiveByte = UCA0RXBUF;
 
     // Will use this as "enter" for the user.
-    if(receiveByte == '#')
+    if(receiveByte == 13) // This is sent from a carriage return
     {
         newInputReceived = 1;
         strcpy(newInput, UARTBuffer);
         UARTBuffer[0] = '\0';
-        __no_operation();
+        //__no_operation();
     }
     else
     {

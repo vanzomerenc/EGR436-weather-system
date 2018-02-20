@@ -134,6 +134,8 @@ void RTC_C_IRQHandler(void)
     if (status & RTC_C_CLOCK_READ_READY_INTERRUPT)
     {
         MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+        // For testing...
+        newTime = MAP_RTC_C_getCalendarTime();
     }
 
     if (status & RTC_C_TIME_EVENT_INTERRUPT)
