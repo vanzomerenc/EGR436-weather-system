@@ -4,8 +4,8 @@
 #include "drv/ST7735/ST7735.h"
 #include "drv/ST7735/ST7735.h"
 #include "drv/adc/adc.h"
-#include "drv/BME280/bme280.h"
 #include "drv/i2c/i2c.h"
+#include "sensors/atmospheric.h"
 #include "rtc.h"
 #include "weather_station_status.h"
 #include "gui/weather_station_ui.h"
@@ -64,26 +64,8 @@ int main(void)
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
 
-    MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN6);
-    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN6);
-    DelayWait10ms(100);
-
-    I2C_Init();
-
-    struct bme280_dev bme280_dev =
-    {
-        .dev_id = BME280_I2C_ADDR_PRIM,
-        .intf = BME280_I2C_INTF,
-        .read = &I2C_WRITE_READ_STRING,
-        .write = &I2C_WRITE_STRING,
-        .delay_ms = Delay1ms,
-        .settings.osr_h = BME280_OVERSAMPLING_1X,
-        .settings.osr_p = BME280_OVERSAMPLING_1X,
-        .settings.osr_t = BME280_OVERSAMPLING_1X,
-        .settings.filter = BME280_FILTER_COEFF_OFF
-    };
-    bme280_init(&bme280_dev);
-    bme280_set_sensor_settings(BME280_OSR_PRESS_SEL | BME280_OSR_TEMP_SEL | BME280_OSR_HUM_SEL | BME280_FILTER_SEL, &bme280_dev);
+    struct bme280_dev sensor_atmospheric = {0};
+    sensor_atmospheric_init(&sensor_atmospheric);
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
 
@@ -131,13 +113,11 @@ int main(void)
             draw_weather_station_ui(status);
         //}
 
-        bme280_set_sensor_mode(BME280_FORCED_MODE, &bme280_dev);
-        struct bme280_data sensor_data = {0};
-        int8_t err = bme280_get_sensor_data(BME280_ALL, &sensor_data, &bme280_dev);
-
-        status.pressure = sensor_data.pressure * 0.000002953;
-        status.indoor_temperature = (sensor_data.temperature * 0.01) * (9.0 / 5.0) + 32.0;
-        status.indoor_humidity = sensor_data.humidity * (1.0 / 1024.0);
+        struct sensor_atmospheric_result sensor_atmospheric_result = {0};
+        sensor_atmospheric_read(&sensor_atmospheric, &sensor_atmospheric_result);
+        status.indoor_humidity = sensor_atmospheric_result.humidity;
+        status.indoor_temperature = sensor_atmospheric_result.temperature;
+        status.pressure = sensor_atmospheric_result.pressure;
 
         DelayWait10ms(100);
     }
