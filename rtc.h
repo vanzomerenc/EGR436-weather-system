@@ -23,4 +23,4 @@ void rtc_gettemp(float *result);
 
 void rtc_format(struct rtc_time *time, char *result, size_t length);
 
-int rtc_decToHex(int dec);
+//int rtc_decToHex(int dec);

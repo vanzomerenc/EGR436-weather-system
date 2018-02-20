@@ -11,6 +11,7 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
+#include "sdcard.h"
 //hello
 volatile int MCLKfreq, SMCLKfreq;
 
@@ -63,6 +64,8 @@ int main(void)
     init_ADC();
     I2C_Init();
     rtc_init(); // prelab 7
+    initUART(); // prelab 7
+    Interrupt_enableMaster();
 
     int32_t err = bme280_data_readout_template();
 
@@ -91,6 +94,8 @@ int main(void)
             }
     };
 
+    printf("Press # to set the time.\n");
+    struct rtc_time timeToEnter;
     // TODO testing that we can set the RTC registers
     rtc_settime(&status.time);
 
@@ -123,6 +128,7 @@ int main(void)
 
         // RTC Functions (Prelab 7)
         rtc_gettime(&status.time);
+        processUART(&timeToEnter);
 
         DelayWait10ms(100);
     }

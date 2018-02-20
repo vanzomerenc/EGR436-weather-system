@@ -17,35 +17,35 @@
 
  // Converts a decimal integer into a hex representation for the RTC's registers
  // This function may not be needed if the RTC DriverLib functions work as expected
-int rtc_decToHex(int dec)
-{
-    int digits[4]; // max allowed digits ... least significant to most significant
-    int digitIndex = 0;
-    int hex = 0;
-
-    // Break the decimal number into its digits and store in an array
-    while(dec >= 10)
-    {
-
-        digits[digitIndex] = dec % 10;
-        dec = dec / 10;
-        ++digitIndex;
-        if(digitIndex > 3)
-        {
-            return 0; // error (this means the dec value has more than 4 digits)
-        }
-    }
-    // Most significant digit
-    digits[digitIndex] = dec;
-
-    int i = 0;
-    for(i = 0; i <= digitIndex; ++i)
-    {
-        hex += digits[i] * pow(16, i);
-    }
-
-    return hex;
-}
+//int rtc_decToHex(int dec)
+//{
+//    int digits[4]; // max allowed digits ... least significant to most significant
+//    int digitIndex = 0;
+//    int hex = 0;
+//
+//    // Break the decimal number into its digits and store in an array
+//    while(dec >= 10)
+//    {
+//
+//        digits[digitIndex] = dec % 10;
+//        dec = dec / 10;
+//        ++digitIndex;
+//        if(digitIndex > 3)
+//        {
+//            return 0; // error (this means the dec value has more than 4 digits)
+//        }
+//    }
+//    // Most significant digit
+//    digits[digitIndex] = dec;
+//
+//    int i = 0;
+//    for(i = 0; i <= digitIndex; ++i)
+//    {
+//        hex += digits[i] * pow(16, i);
+//    }
+//
+//    return hex;
+//}
 
 void rtc_init()
 {
@@ -76,22 +76,11 @@ void rtc_init()
 
     /* Enable interrupts  */
     MAP_Interrupt_enableInterrupt(INT_RTC_C);
-    MAP_Interrupt_enableMaster();
 
 }
 
 void rtc_gettime(struct rtc_time *result)
 {
-    // Translate RTC_C_Calendar format and store in the rtc_time result
-    /**
-    result->hour = RTC_C_convertBCDToBinary(newTime.hours);
-    result->sec = RTC_C_convertBCDToBinary(newTime.seconds);
-    result->min = RTC_C_convertBCDToBinary(newTime.minutes);
-    result->date = RTC_C_convertBCDToBinary(newTime.dayOfmonth);
-    result->month = RTC_C_convertBCDToBinary(newTime.month);
-    result->year = RTC_C_convertBCDToBinary(newTime.year);
-    */
-
     result->hour = newTime.hours;
     result->sec = newTime.seconds;
     result->min = newTime.minutes;
@@ -103,14 +92,6 @@ void rtc_gettime(struct rtc_time *result)
 // Make sure to set values as hex
 void rtc_settime(struct rtc_time *time)
 {
-    /*
-    uint_fast8_t seconds = rtc_decToHex(time->sec);
-    uint_fast8_t minutes = rtc_decToHex(time->min);
-    uint_fast8_t hours = rtc_decToHex(time->hour);
-    uint_fast8_t dayOfmonth = rtc_decToHex(time->date);
-    uint_fast8_t month = rtc_decToHex(time->month);
-    uint_fast16_t year = rtc_decToHex(time->year);
-    */
     RTC_C_Calendar toBeSetTime;
     toBeSetTime.seconds = time->sec;
     toBeSetTime.minutes = time->min;
@@ -119,7 +100,6 @@ void rtc_settime(struct rtc_time *time)
     toBeSetTime.month = time->month;
     toBeSetTime.year = time->year;
 
-    // TODO test that these successfully set the time as expected
     MAP_RTC_C_holdClock(); // Unlock the RTC so we can write to the registers
     MAP_RTC_C_initCalendar(&toBeSetTime, RTC_C_FORMAT_BINARY ); // Init with new date/time
     // Clean up interrupts

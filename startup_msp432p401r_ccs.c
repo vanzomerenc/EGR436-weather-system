@@ -58,6 +58,7 @@ extern unsigned long __STACK_END;
 void handle_ADC_interrupt();
 /* To be added by user */
 void RTC_C_IRQHandler();
+void EusciA0_ISR();
 
 /* Interrupt vector table.  Note that the proper constructs must be placed on this to  */
 /* ensure that it ends up at physical address 0x0000.0000 or at the start of          */
@@ -99,7 +100,7 @@ void (* const interruptVectors[])(void) =
     defaultISR,                             /* TA2_N ISR                 */
     defaultISR,                             /* TA3_0 ISR                 */
     defaultISR,                             /* TA3_N ISR                 */
-    defaultISR,                             /* EUSCIA0 ISR               */
+    EusciA0_ISR,                             /* EUSCIA0 ISR               */
     defaultISR,                             /* EUSCIA1 ISR               */
     defaultISR,                             /* EUSCIA2 ISR               */
     defaultISR,                             /* EUSCIA3 ISR               */
