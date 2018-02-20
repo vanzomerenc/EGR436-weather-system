@@ -60,7 +60,9 @@ int main(void)
     SMCLKfreq=MAP_CS_getSMCLK();  // get SMCLK value to verify it was set correctly
     MCLKfreq=MAP_CS_getMCLK();  // get MCLK value
 
-    init_ADC();
+    struct adc_channel_config adc_channels[1];
+    adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
+    adc_init(1, adc_channels);
 
     MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN6);
     MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN6);
@@ -114,7 +116,8 @@ int main(void)
 
         MAP_ADC14_toggleConversionTrigger();
 
-        int light_reading = ADC.result[1];
+        int16_t light_reading = 0;
+        adc_get_single_raw(0, &light_reading);
 
         if(light_reading < 100) {lighting_index = 0;}
         else if(light_reading < 3000) {lighting_index = 1;}

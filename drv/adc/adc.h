@@ -11,20 +11,26 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define ADC_NUM_CHANNELS 32
+#define ADC_MAX_NUM_CHANNELS 32
+#define ADC_MAX_INPUT_ID 24
 
-struct ADC
+struct adc_channel_config
 {
-    struct
-    {
-        int input_id;
-        bool is_high_range;
-    } config[ADC_NUM_CHANNELS];
-    int16_t result[ADC_NUM_CHANNELS];
+    int input_id;
+    bool is_high_range;
 };
 
-extern volatile struct ADC ADC;
+enum adc_error
+{
+    ADC_TOO_MANY_CHANNELS = 1,
+    ADC_INVALID_CHANNEL = 2,
+    ADC_INVALID_INPUT_ID = 3
+};
 
-void init_ADC();
+int adc_init(int num_channels, struct adc_channel_config *channels);
+
+int adc_get_all_raw(int16_t *results);
+int adc_get_single_raw(int channel, int16_t *result);
+
 
 #endif /* ADC_H_ */
