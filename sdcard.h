@@ -50,18 +50,24 @@ void EusciA0_ISR(void)
     // Will use this as "enter" for the user.
     if(receiveByte == 13) // This is sent from a carriage return
     {
+        // Set flag indicating new input available in buffer
         newInputReceived = 1;
+        // Copy the buffer to the newInput global string so we don't lose it
         strcpy(newInput, UARTBuffer);
+        // Set the first byte of buffer to a null char so we can start a new string
         UARTBuffer[0] = '\0';
         //__no_operation();
     }
     else
     {
+        // Check for valid input
         if(isdigit(receiveByte))
         {
+            // Convert character to null-terminating string
             char tempS[2];
             tempS[0] = receiveByte;
             tempS[1] = '\0';
+            // Concat the char string with the bytes already stored in buffer
             strcat(UARTBuffer, tempS);
         }
     }
@@ -92,42 +98,51 @@ void initUART()
 
 void processUART(struct rtc_time* time)
 {
+    // This tracks a state machine that keeps track of where the user
+    // is in the process of setting the date/time
     if(newInputReceived)
     {
         switch(timeSetState)
         {
+        // first prompt
             case NOT_SETTING:
-                printf("\nEnter the month\n");
+                printf("\n\rEnter the month\n\r");
                 break;
-            case SETTING_MONTH:
+            case SETTING_MONTH: // Grab int from serial in, stored as month
                 sscanf(newInput, "%d", &time->month);
-                printf("\nEnter the day\n");
+                printf("\n\rEnter the day\n\r");
                 break;
-            case SETTING_DAY:
+            case SETTING_DAY: // Store int from serial in as day of month
                 sscanf(newInput, "%d", &time->date);
-                printf("\nEnter the year\n");
+                printf("\n\rEnter the year\n\r");
                 break;
-            case SETTING_YEAR:
+            case SETTING_YEAR: // Store int from serial in as year
                 sscanf(newInput, "%d", &time->year);
-                printf("\nEnter the hour\n");
+                printf("\n\rEnter the hour\n\r");
                 break;
-            case SETTING_HOUR:
+            case SETTING_HOUR:  // hour
                 sscanf(newInput, "%d", &time->hour);
-                printf("\nEnter the minute\n");
+                printf("\n\rEnter the minute\n\r");
                 break;
-            case SETTING_MINUTE:
+            case SETTING_MINUTE: // minutes
                 sscanf(newInput, "%d", &time->min);
-                printf("\nEnter the second\n");
+                printf("\n\rEnter the second\n\r");
                 break;
-            case SETTING_SECOND:
+            case SETTING_SECOND: // seconds
                 sscanf(newInput, "%d", &time->sec);
-                printf("\nTime set.\n");
+                printf("\n\rTime set.\n\r");
                 break;
 
         }
         if(timeSetState == SETTING_SECOND)
         {
+            // If we got to the last stage, go ahead and send the struct on
             rtc_settime(time);
+            // Print formatted results to terminal
+            printf("%d-%d-%d %d:%d:%d\n\r", time->month
+                   , time->date, time->year, time->hour
+                   , time->min, time->sec);
+            // Set the state machine back to the start
             timeSetState = NOT_SETTING;
         }
         else

@@ -15,38 +15,6 @@
          .year = 1955
  };
 
- // Converts a decimal integer into a hex representation for the RTC's registers
- // This function may not be needed if the RTC DriverLib functions work as expected
-//int rtc_decToHex(int dec)
-//{
-//    int digits[4]; // max allowed digits ... least significant to most significant
-//    int digitIndex = 0;
-//    int hex = 0;
-//
-//    // Break the decimal number into its digits and store in an array
-//    while(dec >= 10)
-//    {
-//
-//        digits[digitIndex] = dec % 10;
-//        dec = dec / 10;
-//        ++digitIndex;
-//        if(digitIndex > 3)
-//        {
-//            return 0; // error (this means the dec value has more than 4 digits)
-//        }
-//    }
-//    // Most significant digit
-//    digits[digitIndex] = dec;
-//
-//    int i = 0;
-//    for(i = 0; i <= digitIndex; ++i)
-//    {
-//        hex += digits[i] * pow(16, i);
-//    }
-//
-//    return hex;
-//}
-
 void rtc_init()
 {
     /* Configuring pins for peripheral/crystal usage and LED for output */
