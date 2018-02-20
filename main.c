@@ -92,7 +92,7 @@ int main(void)
     };
 
     // TODO testing that we can set the RTC registers
-
+    rtc_settime(&status.time);
 
     int lighting_index = 0;
     while(1) {  // loop through the test functions to demonstrate the LCD capabilities
