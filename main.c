@@ -11,6 +11,7 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
+#include "sdcard.h"
 //hello
 volatile int MCLKfreq, SMCLKfreq;
 
@@ -63,6 +64,9 @@ int main(void)
     struct adc_channel_config adc_channels[1];
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
+    rtc_init(); // prelab 7
+    initUART(); // prelab 7
+    Interrupt_enableMaster();
 
     struct bme280_dev sensor_atmospheric = {0};
     sensor_atmospheric_init(&sensor_atmospheric);
@@ -70,11 +74,10 @@ int main(void)
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
 
     // initialize button
-
     MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1 | GPIO_PIN4);
 
-
     ST7735_FillScreen(0);
+
 
     struct weather_station_status status = (struct weather_station_status) {
         .lighting = lighting_dark,
@@ -92,6 +95,11 @@ int main(void)
                 .year = 2018
             }
     };
+
+    printf("Press enter to set the time.\n");
+    struct rtc_time timeToEnter;
+    // TODO testing that we can set the RTC registers
+    //rtc_settime(&status.time);
 
     int lighting_index = 0;
     while(1) {  // loop through the test functions to demonstrate the LCD capabilities
@@ -118,6 +126,10 @@ int main(void)
         status.indoor_humidity = sensor_atmospheric_result.humidity;
         status.indoor_temperature = sensor_atmospheric_result.temperature;
         status.pressure = sensor_atmospheric_result.pressure;
+
+        // RTC Functions (Prelab 7)
+        rtc_gettime(&status.time);
+        processUART(&timeToEnter);
 
         DelayWait10ms(100);
     }
