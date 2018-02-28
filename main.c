@@ -5,8 +5,8 @@
 #include "drv/ST7735/ST7735.h"
 #include "drv/ST7735/ST7735.h"
 #include "drv/adc/adc.h"
-#include "drv/BME280/i2c.h"
-#include "drv/BME280/bme280_support.h"
+#include "drv/i2c/i2c.h"
+#include "sensors/atmospheric.h"
 #include "rtc.h"
 #include "weather_station_status.h"
 #include "gui/weather_station_ui.h"
@@ -21,10 +21,12 @@ int main(void)
 	expect_frequency(CS_MCLK, 48*MHz);
 	expect_frequency(CS_SMCLK, 24*MHz);
 
-    init_ADC();
-    I2C_Init();
+    struct adc_channel_config adc_channels[1];
+    adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
+    adc_init(1, adc_channels);
 
-    int32_t err = bme280_data_readout_template();
+    struct bme280_dev sensor_atmospheric = {0};
+    sensor_atmospheric_init(&sensor_atmospheric);
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
 
@@ -57,7 +59,8 @@ int main(void)
 
         MAP_ADC14_toggleConversionTrigger();
 
-        int light_reading = ADC.result[1];
+        int16_t light_reading = 0;
+        adc_get_single_raw(0, &light_reading);
 
         if(light_reading < 100) {lighting_index = 0;}
         else if(light_reading < 3000) {lighting_index = 1;}
@@ -71,13 +74,11 @@ int main(void)
             draw_weather_station_ui(status);
         //}
 
-        uint32_t pressure = 0;
-        int32_t temperature = 0;
-        uint32_t humidity = 0;
-        bme280_read_pressure_temperature_humidity(&pressure, &temperature, &humidity);
-        status.pressure = pressure * 0.0002953;
-        status.indoor_temperature = (temperature * 0.01) * (9.0 / 5.0) + 32.0;
-        status.indoor_humidity = humidity * (1.0 / 1024.0);
+        struct sensor_atmospheric_result sensor_atmospheric_result = {0};
+        sensor_atmospheric_read(&sensor_atmospheric, &sensor_atmospheric_result);
+        status.indoor_humidity = sensor_atmospheric_result.humidity;
+        status.indoor_temperature = sensor_atmospheric_result.temperature;
+        status.pressure = sensor_atmospheric_result.pressure;
 
         delay_ms(1000);
     }
