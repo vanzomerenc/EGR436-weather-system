@@ -11,6 +11,7 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
+#include "sdcard.h"
 //hello
 volatile int MCLKfreq, SMCLKfreq;
 
@@ -54,9 +55,9 @@ int main(void)
     clockInit48MHzXTL();  // set up the clock to use the crystal oscillator on the Launchpad
     MAP_CS_initClockSignal(CS_MCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
     MAP_CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_2);
-//    MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);  // use this if the crystal oscillator does not respond
-//    MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-//    MAP_CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_4);  // set SMCLK to 12 MHz
+//  MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);  // use this if the crystal oscillator does not respond
+//  MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+//  MAP_CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_4);  // set SMCLK to 12 MHz
     SMCLKfreq=MAP_CS_getSMCLK();  // get SMCLK value to verify it was set correctly
     MCLKfreq=MAP_CS_getMCLK();  // get MCLK value
 
@@ -70,11 +71,10 @@ int main(void)
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
 
     // initialize button
-
     MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1 | GPIO_PIN4);
 
-
     ST7735_FillScreen(0);
+
 
     struct weather_station_status status = (struct weather_station_status) {
         .lighting = lighting_dark,
@@ -92,6 +92,11 @@ int main(void)
                 .year = 2018
             }
     };
+
+    printf("Press enter to set the time.\n");
+    struct rtc_time timeToEnter;
+    // TODO testing that we can set the RTC registers
+    //rtc_settime(&status.time);
 
     int lighting_index = 0;
     while(1) {  // loop through the test functions to demonstrate the LCD capabilities
@@ -118,6 +123,10 @@ int main(void)
         status.indoor_humidity = sensor_atmospheric_result.humidity;
         status.indoor_temperature = sensor_atmospheric_result.temperature;
         status.pressure = sensor_atmospheric_result.pressure;
+
+        // RTC Functions (Prelab 7)
+        rtc_gettime(&status.time);
+        processUART(&timeToEnter);
 
         DelayWait10ms(100);
     }
