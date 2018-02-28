@@ -54,6 +54,9 @@
 /*---------------------------------------------------------------------------*/
 #include "bme280.h"
 
+// TODO: remove the need to know timing and protocol information
+// TODO: possibly using function pointers / other object-oriented techniques
+#include <drv/timing.h>
 #include "i2c.h"
 
 #define BME280_API
@@ -361,12 +364,11 @@ s8 BME280_SPI_bus_write(u8 dev_addr, u8 reg_addr, u8 *reg_data, u8 cnt)
 }
 
 
-void Delay1ms(uint32_t n);
 /*	Brief : The delay routine
  *	\param : delay in ms
 */
 void BME280_delay_msek(u32 msek)
 {
-	Delay1ms(msek);
+	delay_ms(msek);
 }
 #endif

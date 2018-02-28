@@ -88,10 +88,11 @@
 // Z� (NC) analog input Z-axis from ADXL335 accelerometer
 // Backlight + - Light, backlight connected to +3.3 V
 
-#include <drv/ST7735/ST7735.h>
-#include <drv/ST7735/ST7735_font.h>
+#include "ST7735.h"
+#include "ST7735_font.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <drv/timing.h>
 #include "msp.h"
 
 
@@ -242,38 +243,6 @@ uint8_t static writedata(uint8_t c) {
   EUSCI_A3->TXBUF = c;                        // data out
   while((EUSCI_A3->IFG&0x0001)==0x0000){};    // wait until EUSCI_A3->RXBUF full
   return EUSCI_A3->RXBUF;                     // return the response
-}
-
-
-// delay function for testing
-// which delays about 8.1*ulCount cycles
-#ifdef __TI_COMPILER_VERSION__
-  //Code Composer Studio Code
-  void parrotdelay(unsigned long ulCount){
-  __asm (  "pdloop:  subs    r0, #1\n"
-      "    bne    pdloop\n");
-}
-
-#else
-  //Keil uVision Code
-  __asm void
-  parrotdelay(unsigned long ulCount)
-  {
-    subs    r0, #1
-    bne     parrotdelay
-    bx      lr
-  }
-
-#endif
-// Subroutine to wait 1 msec
-// Inputs: n  number of 1 msec to wait
-// Outputs: None
-// Notes: ...
-void Delay1ms(uint32_t n){
-  while(n){
-    parrotdelay(5901);                  // 1 msec, tuned at 48 MHz
-    n--;
-  }
 }
 
 
@@ -436,7 +405,7 @@ void static commandList(const uint8_t *addr) {
     if(ms) {
       ms = *(addr++);             // Read post-command delay time (ms)
       if(ms == 255) ms = 500;     // If 255, delay for 500 ms
-      Delay1ms(ms);
+      delay_ms(ms);
     }
   }
 }
@@ -453,11 +422,11 @@ void static commonInit(const uint8_t *cmdList) {
   P9->DIR |= 0x1C;                        // make P9.2 (D/C), P9.3 (Reset), and P9.4 (TFT_CS) out
   TFT_CS &= ~TFT_CS_BIT;
   RESET |= RESET_BIT;
-  Delay1ms(500);
+  delay_ms(500);
   RESET &= ~RESET_BIT;
-  Delay1ms(500);
+  delay_ms(500);
   RESET |= RESET_BIT;
-  Delay1ms(500);
+  delay_ms(500);
 
   // initialize eUSCI
   EUSCI_A3->CTLW0 = 0x0001;                   // hold the eUSCI module in reset mode

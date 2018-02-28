@@ -1,6 +1,7 @@
 /* DriverLib Includes */
 #include "driverlib.h"
 
+#include "drv/timing.h"
 #include "drv/ST7735/ST7735.h"
 #include "drv/ST7735/ST7735.h"
 #include "drv/adc/adc.h"
@@ -11,54 +12,14 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
-//hello
-volatile int MCLKfreq, SMCLKfreq;
-
-void clockInit48MHzXTL(void) {  // sets the clock module to use the external 48 MHz crystal
-
-    /* Configuring pins for peripheral/crystal usage */
-    MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ,
-            GPIO_PIN3 | GPIO_PIN2, GPIO_PRIMARY_MODULE_FUNCTION);
-    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
-
-    CS_setExternalClockSourceFrequency(32000,48000000); // enables getMCLK, getSMCLK to know externally set frequencies
-
-    /* Starting HFXT in non-bypass mode without a timeout. Before we start
-     * we have to change VCORE to 1 to support the 48MHz frequency */
-    MAP_PCM_setCoreVoltageLevel(PCM_VCORE1);
-    MAP_FlashCtl_setWaitState(FLASH_BANK0, 2);
-    MAP_FlashCtl_setWaitState(FLASH_BANK1, 2);
-    CS_startHFXT(false);  // false means that there are no timeouts set, will return when stable
-
-    /* Initializing MCLK to HFXT (effectively 48MHz) */
-    MAP_CS_initClockSignal(CS_MCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
-}
-
-// Subroutine to wait 1 msec (assumes 48 MHz clock)
-// Inputs: n  number of 1 msec to wait
-// Outputs: None
-// Notes: implemented in ST7735.c as count of assembly instructions executed
-void Delay1ms(uint32_t n);
-// Subroutine to wait 10 msec
-// Inputs: n  number of 10 msec to wait
-// Outputs: None
-// Notes: calls Delay1ms repeatedly
-void DelayWait10ms(uint32_t n){
-  Delay1ms(n*10);
-}
 
 
 
 int main(void)
 {
-    clockInit48MHzXTL();  // set up the clock to use the crystal oscillator on the Launchpad
-    MAP_CS_initClockSignal(CS_MCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
-    MAP_CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_2);
-//    MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);  // use this if the crystal oscillator does not respond
-//    MAP_CS_initClockSignal(CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-//    MAP_CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_4);  // set SMCLK to 12 MHz
-    SMCLKfreq=MAP_CS_getSMCLK();  // get SMCLK value to verify it was set correctly
-    MCLKfreq=MAP_CS_getMCLK();  // get MCLK value
+	init_clocks();
+	expect_frequency(CS_MCLK, 48*MHz);
+	expect_frequency(CS_SMCLK, 24*MHz);
 
     init_ADC();
     I2C_Init();
@@ -118,7 +79,7 @@ int main(void)
         status.indoor_temperature = (temperature * 0.01) * (9.0 / 5.0) + 32.0;
         status.indoor_humidity = humidity * (1.0 / 1024.0);
 
-        DelayWait10ms(100);
+        delay_ms(1000);
     }
 }
 
