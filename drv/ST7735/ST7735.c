@@ -1294,11 +1294,12 @@ void ST7735_SetTextColor(uint16_t color){
   StTextColor = color;
 }
 
+//@NOTE ST 2-19-2018 Had to comment this out so the tera term fputc override could be used
 // Print a character to ST7735 LCD.
-int fputc(int ch, FILE *f){
-  ST7735_OutChar(ch);
-  return 1;
-}
+//int fputc(int ch, FILE *f){
+//  ST7735_OutChar(ch);
+//  return 1;
+//}
 
 // No input from Nokia, always return data.
 int fgetc (FILE *f){
