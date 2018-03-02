@@ -69,6 +69,8 @@ int main(void)
     sensor_atmospheric_init(&sensor_atmospheric);
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
+    initUART();
+    rtc_init();
 
     // initialize button
     MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1 | GPIO_PIN4);
