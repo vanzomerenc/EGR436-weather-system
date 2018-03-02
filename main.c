@@ -64,6 +64,9 @@ int main(void)
     struct adc_channel_config adc_channels[1];
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
+    rtc_init(); // prelab 7
+    initUART(); // prelab 7
+    Interrupt_enableMaster();
 
     struct bme280_dev sensor_atmospheric = {0};
     sensor_atmospheric_init(&sensor_atmospheric);
