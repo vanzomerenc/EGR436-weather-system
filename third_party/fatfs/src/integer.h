@@ -12,6 +12,7 @@
 
 #else			/* Embedded platform */
 
+
 /* These types must be 16-bit, 32-bit or larger integer */
 typedef int				INT;
 typedef unsigned int	UINT;
@@ -33,7 +34,7 @@ typedef unsigned long	ULONG;
 typedef unsigned long	DWORD;
 
 /* Boolean type */
-typedef enum { FALSE = 0, TRUE } BOOL;
+typedef enum{FALSE = 0, TRUE} BOOL;
 
 #endif
 

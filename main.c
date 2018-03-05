@@ -1,6 +1,6 @@
 /* DriverLib Includes */
+#include "sdcard.h"
 #include "driverlib.h"
-
 #include "drv/ST7735/ST7735.h"
 #include "drv/ST7735/ST7735.h"
 #include "drv/adc/adc.h"
@@ -11,7 +11,8 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
-#include "sdcard.h"
+
+
 //hello
 volatile int MCLKfreq, SMCLKfreq;
 
