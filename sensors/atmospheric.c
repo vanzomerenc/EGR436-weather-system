@@ -11,6 +11,7 @@
 #include "driverlib.h"
 #include "drv/BME280/bme280.h"
 #include "drv/i2c/i2c.h"
+#include "drv/timing.h"
 
 
 
@@ -22,7 +23,7 @@ int sensor_atmospheric_init(struct bme280_dev *out_dev)
 {
     MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN6);
     MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN6);
-    Delay1ms(100);
+    delay_ms(100);
 
     I2C_Init();
 
@@ -32,7 +33,7 @@ int sensor_atmospheric_init(struct bme280_dev *out_dev)
         .intf = BME280_I2C_INTF,
         .read = &I2C_WRITE_READ_STRING,
         .write = &I2C_WRITE_STRING,
-        .delay_ms = Delay1ms,
+        .delay_ms = &delay_ms,
         .settings.osr_h = BME280_OVERSAMPLING_1X,
         .settings.osr_p = BME280_OVERSAMPLING_1X,
         .settings.osr_t = BME280_OVERSAMPLING_1X,

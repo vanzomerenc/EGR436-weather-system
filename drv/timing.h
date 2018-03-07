@@ -32,4 +32,4 @@ void expect_frequency(ClockSignalID clock, ClockFrequency freq);
 void delay_spin_ms(uint32_t n);
 
 // TODO: use something other than spinning for most delays.
-#define delay_ms delay_spin_ms
+inline void delay_ms(uint32_t n) {return delay_spin_ms(n);}
