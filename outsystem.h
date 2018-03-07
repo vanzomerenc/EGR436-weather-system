@@ -70,10 +70,13 @@ void runOutSystem()
 
     // RTC Functions (Prelab 7)
     rtc_gettime(&status.time);
-    //processUART(&timeToEnter);
+    processUART(&timeToEnter);
 
-    writeSD(status.time.min, status.time.hour, status.time.date, status.time.month, status.time.year
-            , light_reading, status.outdoor_temperature, status.outdoor_humidity, status.pressure);
+    if(timeSetState == DONE_SETTING) // note: this means user has already set the rate i.e. already finished configuring everything since it's the last step
+    {
+        writeSD(status.time.min, status.time.hour, status.time.date, status.time.month, status.time.year
+                , light_reading, status.outdoor_temperature, status.outdoor_humidity, status.pressure);
+    }
 }
 
 

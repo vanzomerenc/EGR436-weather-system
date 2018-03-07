@@ -134,7 +134,7 @@ void SysTick_ISR(void) {
 }
 
 
-enum TimeSetState { NOT_SETTING, SETTING_MONTH, SETTING_DAY, SETTING_YEAR, SETTING_HOUR, SETTING_MINUTE, SETTING_SECOND };
+enum TimeSetState { NOT_SETTING, SETTING_MONTH, SETTING_DAY, SETTING_YEAR, SETTING_HOUR, SETTING_MINUTE, SETTING_RATE, DONE_SETTING };
 enum TimeSetState timeSetState = NOT_SETTING;
 char UARTBuffer[256] = {'\0'};
 char newInput[256] = {'\0'};
@@ -220,7 +220,7 @@ void processUART(struct rtc_time* time)
 {
     // This tracks a state machine that keeps track of where the user
     // is in the process of setting the date/time
-    if(newInputReceived)
+    if(newInputReceived && timeSetState != DONE_SETTING)
     {
         switch(timeSetState)
         {
@@ -246,15 +246,16 @@ void processUART(struct rtc_time* time)
                 break;
             case SETTING_MINUTE: // minutes
                 sscanf(newInput, "%d", &time->min);
-                printf("\n\rEnter the second\n\r");
+                printf("\n\rEnter the collection rate (0 = per second, 1 = per minute, 2 = per hour\n\r");
                 break;
-            case SETTING_SECOND: // seconds
+            case SETTING_RATE: // rate to collect data
+                // TODO Implement this feature to set the rate of data collection
                 sscanf(newInput, "%d", &time->sec);
                 printf("\n\rTime set.\n\r");
                 break;
 
         }
-        if(timeSetState == SETTING_SECOND)
+        if(timeSetState == SETTING_RATE)
         {
             // If we got to the last stage, go ahead and send the struct on
             rtc_settime(time);
@@ -262,8 +263,8 @@ void processUART(struct rtc_time* time)
             printf("%d-%d-%d %d:%d:%d\n\r", time->month
                    , time->date, time->year, time->hour
                    , time->min, time->sec);
-            // Set the state machine back to the start
-            timeSetState = NOT_SETTING;
+            // Set the state machine to stop
+            timeSetState = DONE_SETTING;
         }
         else
         {
@@ -459,14 +460,14 @@ int initSD()
     /* Configure SysTick for a 100Hz interrupt.  The FatFs driver wants a 10 ms
      * tick.
      */
-    SysTick_setPeriod(24000000 / 100);
+    SysTick_setPeriod(48000000 / 100);
     SysTick_enableModule();
     SysTick_enableInterrupt();
 
     spi_Open();
 
     // Print hello message to user.
-    printf("\n\nInitializing SD card\r\n");
+    printf("\n\rInitializing SD card\r\n");
     //printf("Type \'help\' for help.\r\n");
 
     // Mount the file system, using logical disk 0.
@@ -477,8 +478,8 @@ int initSD()
         return (1);
     }
 
+    // Start the new file with a header for the CSV stuff
     unsigned int writeBytes = 0;
-    unsigned int readBytes = 0;
     char writeBuff[1000] = {'\0'};
     printf("%s\n\r", FILE_NAME);
     sprintf(writeBuff, "Minute,Hour,Day,Month,Year,Light,Temp,Humidity,Pressure\r\n");
@@ -493,28 +494,8 @@ int initSD()
         printf("f_write error: %s\n\r", StringFromFResult(iFResult));
     }
     printf("%d characters written\n\r", writeBytes);
+    closeSD();
 
-    closeSD(); // test
-
-    // TESSST
-    iFResult = f_open(&g_sFileObject, FILE_NAME, FA_WRITE);
-    if(iFResult != FR_OK)
-    {
-        printf("f_open error: %s\n\r", StringFromFResult(iFResult));
-    }
-    iFResult = f_lseek(&g_sFileObject, g_sFileObject.fsize);
-    if(iFResult != FR_OK)
-    {
-        printf("f_lseek error: %s\n\r", StringFromFResult(iFResult));
-    }
-    iFResult = f_write(&g_sFileObject, writeBuff,strlen(writeBuff),&writeBytes);
-    if(iFResult != FR_OK)
-    {
-        printf("f_write error: %s\n\r", StringFromFResult(iFResult));
-    }
-    printf("%d characters written\n\r", writeBytes);
-
-    closeSD(); // test
     return writeBytes;
 }
 // Taken from the main.c function of the SD card library's example program
@@ -523,13 +504,26 @@ int writeSD(uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint16_t y
             , float light, float temp, float humidity, float pressure)
 {
     unsigned int writeBytes = 0;
-    //unsigned int readBytes = 0;
     char writeBuff[1000] = {'\0'};
     FRESULT iFResult;
 
+    // Open existing file.
+    iFResult = f_open(&g_sFileObject, FILE_NAME, FA_WRITE);
+    if(iFResult != FR_OK)
+    {
+        printf("f_open error: %s\n", StringFromFResult(iFResult));
+    }
+
+    // Move file pointer to end of file
+    iFResult = f_lseek(&g_sFileObject, g_sFileObject.fsize);
+    if(iFResult != FR_OK)
+    {
+        printf("f_lseek error: %s\n\r", StringFromFResult(iFResult));
+    }
+
+    // Write new time/weather data to the file
     sprintf(writeBuff, "%.2d,%.2d,%.2d,%.2d,%.4d,%f,%f,%f,%f\r\n"
             , minute, hour, day, month, year, light, temp, humidity, pressure);
-
     iFResult = f_write(&g_sFileObject, writeBuff, strlen(writeBuff), &writeBytes);
     if(iFResult != FR_OK)
     {
@@ -537,29 +531,8 @@ int writeSD(uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint16_t y
     }
     printf("%d characters written\n\r", writeBytes);
 
-    /**
-        iFResult = f_close(&g_sFileObject);
-        if(iFResult != FR_OK) {
-            printf("f_close error: %s\n", StringFromFResult(iFResult));
-        }
-        iFResult = f_open(&g_sFileObject, newTestFileName, FA_READ);
-        if(iFResult != FR_OK)
-        {
-            printf("f_open error: %s\n", StringFromFResult(iFResult));
-        }
-        iFResult = f_read(&g_sFileObject, g_pcTmpBuf, sizeof(g_pcTmpBuf) - 1, &readBytes);
-        if(iFResult != FR_OK)
-        {
-            printf("f_read error: %s\n", StringFromFResult(iFResult));
-        }
-        printf("%d characters read\n", readBytes);
-        printf("%s\n", g_pcTmpBuf);
-        iFResult = f_close(&g_sFileObject);
-        if(iFResult != FR_OK)
-        {
-            printf("f_close error: %s\n", StringFromFResult(iFResult));
-        }
-        **/
+    // Close the file
+    closeSD();
 
     return writeBytes;
 }

@@ -117,6 +117,7 @@ void insideRoutines()
 }
 
 int main(void)
+
 {
     clockInit48MHzXTL();  // set up the clock to use the crystal oscillator on the Launchpad
     MAP_CS_initClockSignal(CS_MCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
@@ -137,7 +138,7 @@ int main(void)
     // ST 3-6-2018 Put looping routine here
     while(1)
     {
-        //runOutSystem();
+        runOutSystem();
         DelayWait10ms(100);
     }
 }
