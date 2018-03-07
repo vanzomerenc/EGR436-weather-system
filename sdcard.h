@@ -436,70 +436,112 @@ int Cmd_ls(int argc, char *argv[]) {
     return (0);
 }
 
-// Taken from the main.c function of the SD card library's example program
-int processSD()
-{
-    int8_t lucNStatus = 0;
-    FRESULT iFResult;
+// File name used in writing to the SD card
+char FILE_NAME[17] = "record";
 
+// Taken from the main.c function of the SD card library's example program
+// Modified for project 3-6-2018 ST
+int initSD()
+{
+    //int8_t lucNStatus = 0;
+    FRESULT iFResult;
 
     /* Configure SysTick for a 100Hz interrupt.  The FatFs driver wants a 10 ms
      * tick.
      */
-    SysTick_setPeriod(48000000 / 100);
+    SysTick_setPeriod(24000000 / 100);
     SysTick_enableModule();
     SysTick_enableInterrupt();
 
     spi_Open();
 
     // Print hello message to user.
-    printf("\n\nSD Card Example Program\r\n");
-    printf("Type \'help\' for help.\r\n");
+    printf("\n\nInitializing SD card\r\n");
+    //printf("Type \'help\' for help.\r\n");
 
     // Mount the file system, using logical disk 0.
     iFResult = f_mount(0, &g_sFatFs);
     //iFResult = f_mount(&g_sFatFs, "", 0);
     if (iFResult != FR_OK) {
-        printf("f_mount error: %s\n", StringFromFResult(iFResult));
+        printf("f_mount error: %s\n\r", StringFromFResult(iFResult));
         return (1);
     }
 
-    // Commenting this out for now -- was used to obtain input in the SD card example program
-    /* Main while loop */
-    //MAP_PCM_gotoLPM0();
-    /**
-    while (1) {
-        if (gucCommandReady) {
-            // Pass the line from the user to the command processor.  It will be
-            // parsed and valid commands executed.
-            lucNStatus = CmdLineProcess(g_pcCmdBuf);
-
-            // Clear the command buffer, to prep for the next one.
-            memset(g_pcCmdBuf, 0x00, sizeof(g_pcCmdBuf));
-
-            // Handle the case of bad command.
-            if (lucNStatus == CMDLINE_BAD_CMD) {
-                printf("Bad or no command!\r\n");
-            }
-
-            // Handle the case of too many arguments.
-            else if (lucNStatus == CMDLINE_TOO_MANY_ARGS) {
-                printf("Too many arguments for command processor!\r\n");
-            }
-
-            // Otherwise the command was executed.  Print the error code if one was
-            // returned.
-            else if (lucNStatus != 0) {
-                printf("Command returned error code %s\r\n",
-                        StringFromFResult((FRESULT) lucNStatus));
-            }
-
-            printf(">");
-            gucCommandReady = 0;
-        }
+    unsigned int writeBytes = 0;
+    unsigned int readBytes = 0;
+    char writeBuff[1000] = {'\0'};
+    printf("%s\n\r", FILE_NAME);
+    sprintf(writeBuff, "Minute,Hour,Day,Month,Year,Light,Temp,Humidity,Pressure\r\n");
+    iFResult = f_open(&g_sFileObject, FILE_NAME, FA_WRITE | FA_CREATE_ALWAYS);
+    if(iFResult != FR_OK)
+    {
+        printf("f_open error: %s\n\r", StringFromFResult(iFResult));
     }
-    */
-    return 0;
+    iFResult = f_write(&g_sFileObject, writeBuff,strlen(writeBuff),&writeBytes);
+    if(iFResult != FR_OK)
+    {
+        printf("f_write error: %s\n\r", StringFromFResult(iFResult));
+    }
+    printf("%d characters written\n\r", writeBytes);
+
+    closeSD(); // test
+    return writeBytes;
+}
+// Taken from the main.c function of the SD card library's example program
+// Modified for project 3-6-2018 ST
+int writeSD(uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint16_t year
+            , float light, float temp, float humidity, float pressure)
+{
+    unsigned int writeBytes = 0;
+    //unsigned int readBytes = 0;
+    char writeBuff[1000] = {'\0'};
+    FRESULT iFResult;
+
+    sprintf(writeBuff, "%.2d,%.2d,%.2d,%.2d,%.4d,%f,%f,%f,%f\r\n"
+            , minute, hour, day, month, year, light, temp, humidity, pressure);
+
+    iFResult = f_write(&g_sFileObject, writeBuff, strlen(writeBuff), &writeBytes);
+    if(iFResult != FR_OK)
+    {
+        printf("f_write error: %s\n\r", StringFromFResult(iFResult));
+    }
+    printf("%d characters written\n\r", writeBytes);
+
+    /**
+        iFResult = f_close(&g_sFileObject);
+        if(iFResult != FR_OK) {
+            printf("f_close error: %s\n", StringFromFResult(iFResult));
+        }
+        iFResult = f_open(&g_sFileObject, newTestFileName, FA_READ);
+        if(iFResult != FR_OK)
+        {
+            printf("f_open error: %s\n", StringFromFResult(iFResult));
+        }
+        iFResult = f_read(&g_sFileObject, g_pcTmpBuf, sizeof(g_pcTmpBuf) - 1, &readBytes);
+        if(iFResult != FR_OK)
+        {
+            printf("f_read error: %s\n", StringFromFResult(iFResult));
+        }
+        printf("%d characters read\n", readBytes);
+        printf("%s\n", g_pcTmpBuf);
+        iFResult = f_close(&g_sFileObject);
+        if(iFResult != FR_OK)
+        {
+            printf("f_close error: %s\n", StringFromFResult(iFResult));
+        }
+        **/
+
+    return writeBytes;
+}
+
+FRESULT closeSD()
+{
+    FRESULT iFResult;
+    iFResult = f_close(&g_sFileObject);
+    if(iFResult != FR_OK) {
+        printf("f_close error: %s\n", StringFromFResult(iFResult));
+    }
+    return iFResult;
 }
 
 //*****************************************************************************
