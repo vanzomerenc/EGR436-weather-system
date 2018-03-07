@@ -2,7 +2,9 @@
 
 /* Statics */
 // @NOTE ST 2-19-2018 This is what gets updated by the MSP432's RTC
- static volatile RTC_C_Calendar newTime;
+static volatile RTC_C_Calendar newTime;
+
+enum IntervalSetting pollIntervalSetting = POLL_SECOND;
 
  /* Time is November 12th 1955 10:03:00 PM */
  const RTC_C_Calendar currentTime =
@@ -14,6 +16,27 @@
          .month = 11,
          .year = 1955
  };
+
+int rtc_getinterval()
+{
+   return pollIntervalSetting;
+}
+
+void rtc_setinterval(int setting)
+{
+    if(setting == POLL_SECOND)
+    {
+        pollIntervalSetting = POLL_SECOND;
+    }
+    if(setting == POLL_MINUTE)
+    {
+        pollIntervalSetting = POLL_MINUTE;
+    }
+    if(setting == POLL_HOUR)
+    {
+        pollIntervalSetting = POLL_HOUR;
+    }
+}
 
 void rtc_init()
 {
@@ -45,6 +68,24 @@ void rtc_init()
     /* Enable interrupts  */
     MAP_Interrupt_enableInterrupt(INT_RTC_C);
 
+}
+
+int rtc_timechanged(struct rtc_time *current)
+{
+    if(current->hour != newTime.hours)
+        return 1;
+    if(current->sec != newTime.seconds)
+        return 1;
+    if(current->min != newTime.minutes)
+        return 1;
+    if(current->month != newTime.month)
+        return 1;
+    if(current->date != newTime.dayOfmonth)
+        return 1;
+    if(current->year != newTime.year)
+        return 1;
+
+    return 0;
 }
 
 void rtc_gettime(struct rtc_time *result)
@@ -103,7 +144,10 @@ void RTC_C_IRQHandler(void)
     {
         MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
         // For testing...
-        newTime = MAP_RTC_C_getCalendarTime();
+        if(pollIntervalSetting == POLL_SECOND)
+        {
+            newTime = MAP_RTC_C_getCalendarTime();
+        }
     }
 
     if (status & RTC_C_TIME_EVENT_INTERRUPT)
