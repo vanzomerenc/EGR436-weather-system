@@ -13,6 +13,7 @@
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
+#include "sensors/light_level.h"
 
 
 
@@ -25,6 +26,7 @@ int main(void)
     struct adc_channel_config adc_channels[1];
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
+    sensor_light_level_init();
     rtc_init(); // prelab 7
     initUART(); // prelab 7
     Interrupt_enableMaster();
@@ -67,8 +69,8 @@ int main(void)
 
         MAP_ADC14_toggleConversionTrigger();
 
-        int16_t light_reading = 0;
-        adc_get_single_raw(0, &light_reading);
+        float light_reading = 0;
+        sensor_light_level_read(&light_reading);
 
         if(light_reading < 100) {lighting_index = 0;}
         else if(light_reading < 3000) {lighting_index = 1;}

@@ -14,6 +14,10 @@
 #define ADC_MAX_NUM_CHANNELS 32
 #define ADC_MAX_INPUT_ID 24
 
+#define ADC_MAX_READING (1 << 14)
+#define ADC_HIGH_RANGE_MAX_VOLTAGE 3.3f
+#define ADC_LOW_RANGE_MAX_VOLTAGE 1.2f
+
 struct adc_channel_config
 {
     int input_id;
@@ -32,5 +36,8 @@ int adc_init(int num_channels, struct adc_channel_config *channels);
 int adc_get_all_raw(int16_t *results);
 int adc_get_single_raw(int channel, int16_t *result);
 
+float adc_convert(int16_t raw, bool is_high_range);
+
+int adc_get_single(int channel, float *result);
 
 #endif /* ADC_H_ */

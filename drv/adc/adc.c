@@ -162,3 +162,21 @@ int adc_get_single_raw(int channel, int16_t *result)
     *result = adc_result[channel];
     return 0;
 }
+
+
+
+float adc_convert(int16_t raw, bool is_high_range)
+{
+    return raw * (is_high_range? ADC_HIGH_RANGE_MAX_VOLTAGE : ADC_LOW_RANGE_MAX_VOLTAGE) / ADC_MAX_READING;
+}
+
+
+
+int adc_get_single(int channel, float *result)
+{
+    int16_t raw;
+    enum adc_error err = adc_get_single_raw(channel, &raw);
+    if(err) return err;
+    *result = adc_convert(raw, adc_channels[channel].is_high_range);
+    return 0;
+}
