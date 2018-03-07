@@ -439,6 +439,16 @@ int Cmd_ls(int argc, char *argv[]) {
 // File name used in writing to the SD card
 char FILE_NAME[17] = "record";
 
+FRESULT closeSD()
+{
+    FRESULT iFResult;
+    iFResult = f_close(&g_sFileObject);
+    if(iFResult != FR_OK) {
+        printf("f_close error: %s\n", StringFromFResult(iFResult));
+    }
+    return iFResult;
+}
+
 // Taken from the main.c function of the SD card library's example program
 // Modified for project 3-6-2018 ST
 int initSD()
@@ -476,6 +486,26 @@ int initSD()
     if(iFResult != FR_OK)
     {
         printf("f_open error: %s\n\r", StringFromFResult(iFResult));
+    }
+    iFResult = f_write(&g_sFileObject, writeBuff,strlen(writeBuff),&writeBytes);
+    if(iFResult != FR_OK)
+    {
+        printf("f_write error: %s\n\r", StringFromFResult(iFResult));
+    }
+    printf("%d characters written\n\r", writeBytes);
+
+    closeSD(); // test
+
+    // TESSST
+    iFResult = f_open(&g_sFileObject, FILE_NAME, FA_WRITE);
+    if(iFResult != FR_OK)
+    {
+        printf("f_open error: %s\n\r", StringFromFResult(iFResult));
+    }
+    iFResult = f_lseek(&g_sFileObject, g_sFileObject.fsize);
+    if(iFResult != FR_OK)
+    {
+        printf("f_lseek error: %s\n\r", StringFromFResult(iFResult));
     }
     iFResult = f_write(&g_sFileObject, writeBuff,strlen(writeBuff),&writeBytes);
     if(iFResult != FR_OK)
@@ -534,15 +564,7 @@ int writeSD(uint8_t minute, uint8_t hour, uint8_t day, uint8_t month, uint16_t y
     return writeBytes;
 }
 
-FRESULT closeSD()
-{
-    FRESULT iFResult;
-    iFResult = f_close(&g_sFileObject);
-    if(iFResult != FR_OK) {
-        printf("f_close error: %s\n", StringFromFResult(iFResult));
-    }
-    return iFResult;
-}
+
 
 //*****************************************************************************
 //
