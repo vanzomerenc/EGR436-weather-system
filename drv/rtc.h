@@ -19,6 +19,7 @@ enum IntervalSetting { POLL_SECOND, POLL_MINUTE, POLL_HOUR };
 
 extern char const * const rtc_day_name[8];
 
+int rtc_timechanged(struct rtc_time *current);
 void rtc_init();
 void rtc_gettime(struct rtc_time *result);
 void rtc_settime(struct rtc_time *time);

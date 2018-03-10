@@ -1,3 +1,6 @@
+#ifndef RECEIVER_H_
+#define RECEIVER_H_
+
 /* DriverLib Includes */
 #include "driverlib.h"
 
@@ -73,4 +76,4 @@ void receiverRoutine()
     }
 }
 
-
+#endif // RECEIVER_H_

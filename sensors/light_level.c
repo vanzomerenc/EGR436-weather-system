@@ -34,6 +34,7 @@ static float lux_points[LUX_APPROXIMATION_N_DATA_POINTS] =
 
 int sensor_light_level_init()
 {
+    return 0;
 }
 
 int sensor_light_level_read(float *out_light_level)
