@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "msprf24.h"
+#include <drv/msprf24.h>
 volatile unsigned int user;
 
 char buf[32];
