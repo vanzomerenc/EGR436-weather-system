@@ -35,7 +35,7 @@
 */
 
 /* DriverLib Includes */
-#include <spiDriver.h>
+#include <drv/spiDriver.h>
 #include "driverlib.h"
 
 #define ASSERT_CS()          (P4OUT &= ~BIT6)

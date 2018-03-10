@@ -13,8 +13,8 @@
 #include <driverlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "rtc.h"
-#include "spiDriver.h"
+#include "drv/rtc.h"
+#include "drv/spiDriver.h"
 #include "utils/cmdline.h"
 #include "third_party/fatfs/src/ff.h"
 #include "third_party/fatfs/src/diskio.h"
@@ -221,6 +221,7 @@ void processUART(struct rtc_time* time)
 {
     // This tracks a state machine that keeps track of where the user
     // is in the process of setting the date/time
+    int interval;
     if(newInputReceived && timeSetState != DONE_SETTING)
     {
         switch(timeSetState)
@@ -251,7 +252,6 @@ void processUART(struct rtc_time* time)
                 break;
             case SETTING_RATE: // rate to collect data
                 // TODO Implement this feature to set the rate of data collection
-                int interval;
                 sscanf(newInput, "%d", &interval);
                 rtc_setinterval(interval);
                 if(rtc_getinterval() == POLL_MINUTE)
