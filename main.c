@@ -14,6 +14,8 @@
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
 #include "sensors/light_level.h"
+#include "drv/nrf24/msprf24.h"
+#include "receiver.h"
 
 
 
@@ -36,6 +38,8 @@ int main(void)
     sensor_atmospheric_init(&sensor_atmospheric);
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
+
+    receiverInit();
 
     // initialize button
     MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1 | GPIO_PIN4);
@@ -74,9 +78,9 @@ int main(void)
         sensor_light_level_read(&light_reading);
 
         if(light_reading < 100) {lighting_index = 0;}
-        else if(light_reading < 3000) {lighting_index = 1;}
-        else if(light_reading < 7000) {lighting_index = 2;}
-        else if(light_reading < 10000) {lighting_index = 3;}
+        else if(light_reading < 300) {lighting_index = 1;}
+        else if(light_reading < 1000) {lighting_index = 2;}
+        else if(light_reading < 3000) {lighting_index = 3;}
         else {lighting_index = 4;}
 
         //if(lighting_index != status.lighting)

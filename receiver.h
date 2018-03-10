@@ -5,13 +5,20 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <drv/msprf24.h>
+#include <drv/nrf24/msprf24.h>
 volatile unsigned int user;
 
 char buf[32];
 
 void receiverInit()
 {
+    spi_init();
+
+    rf_crc = RF24_EN_CRC | RF24_CRCO; // CRC enabled, 16-bit
+    rf_addr_width      = 5;
+    rf_speed_power     = RF24_SPEED_1MBPS | RF24_POWER_0DBM;
+    rf_channel = 42;
+
     char addr[5];
     msprf24_open_pipe(0, 1);  // Open pipe#0 with Enhanced ShockBurst
 
