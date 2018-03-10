@@ -15,10 +15,6 @@
 
 
 
-void Delay1ms(uint32_t n);
-
-
-
 int sensor_atmospheric_init(struct bme280_dev *out_dev)
 {
     MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN6);

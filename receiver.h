@@ -11,6 +11,7 @@
 #include <drv/nrf24/msprf24.h>
 #include <drv/rtc.h>
 #include <sensors/atmospheric.h>
+#include "comm.h"
 
 static struct comm_message received_message;
 
@@ -56,9 +57,9 @@ void receiverRoutine()
         msprf24_get_irq_reason();
     }
     if (rf_irq & RF24_IRQ_RX) {
-        r_rx_payload(32, &received_message->data);
+        r_rx_payload(32, received_message.data);
         msprf24_irq_clear(RF24_IRQ_RX);
-        switch(received_message->data[0])
+        switch(received_message.data[0])
         {
         case COMM_MESSAGE_RTC_TIME:
             comm_decode_rtc_time(&received_message, &received_time);
