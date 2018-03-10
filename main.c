@@ -11,6 +11,7 @@
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
 #include "outsystem.h" // ST 3-6-2018
+#include "receiver.h"
 
 //hello
 volatile int MCLKfreq, SMCLKfreq;
