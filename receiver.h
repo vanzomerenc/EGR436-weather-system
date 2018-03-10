@@ -6,9 +6,14 @@
 #include <stdbool.h>
 
 #include <drv/nrf24/msprf24.h>
-volatile unsigned int user;
+#include <drv/rtc.h>
+#include <sensors/atmospheric.h>
 
-char buf[32];
+static struct comm_message received_message;
+
+struct rtc_time received_time;
+struct sensor_atmospheric_result received_atmospheric_reading;
+float received_light;
 
 void receiverInit()
 {
@@ -48,17 +53,23 @@ void receiverRoutine()
         msprf24_get_irq_reason();
     }
     if (rf_irq & RF24_IRQ_RX) {
-        r_rx_payload(32, buf);
+        r_rx_payload(32, &received_message->data);
         msprf24_irq_clear(RF24_IRQ_RX);
-        user = buf[0];
+        switch(received_message->data[0])
+        {
+        case COMM_MESSAGE_RTC_TIME:
+            comm_decode_rtc_time(&received_message, &received_time);
+            break;
+        case COMM_MESSAGE_SENSORS:
+            comm_decode_sensor_readings(&received_message, &received_atmospheric_reading, &received_light);
+            break;
+        default:
+            break;
+        }
 
-        if (buf[0] == '0')
-            P2OUT &= ~BIT0;
-        if (buf[0] == '1')
-            P2OUT |= BIT0;
+        P2OUT ^= BIT0;
 
     } else {
-        user = 0xFF;
     }
 }
 
