@@ -13,8 +13,8 @@
 #include <driverlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "rtc.h"
-#include "spiDriver.h"
+#include "drv/rtc.h"
+#include "drv/spiDriver.h"
 #include "utils/cmdline.h"
 #include "third_party/fatfs/src/ff.h"
 #include "third_party/fatfs/src/diskio.h"

@@ -9,7 +9,7 @@
 #define WEATHER_STATION_STATUS_H_
 
 #include <stdint.h>
-#include "rtc.h"
+#include "drv/rtc.h"
 
 enum lighting_condition
 {

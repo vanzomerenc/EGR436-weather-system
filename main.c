@@ -8,7 +8,7 @@
 #include "drv/adc/adc.h"
 #include "drv/i2c/i2c.h"
 #include "sensors/atmospheric.h"
-#include "rtc.h"
+#include "drv/rtc.h"
 #include "weather_station_status.h"
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
@@ -27,6 +27,7 @@ int main(void)
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
     sensor_light_level_init();
+
     rtc_init(); // prelab 7
     initUART(); // prelab 7
     Interrupt_enableMaster();
