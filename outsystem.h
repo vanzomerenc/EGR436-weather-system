@@ -58,7 +58,7 @@ void initOutSystem()
 void runOutSystem()
 {
     MAP_ADC14_toggleConversionTrigger();
-
+    int pollData = 0;
     int16_t light_reading = 0;
     adc_get_single_raw(0, &light_reading);
 
@@ -69,13 +69,21 @@ void runOutSystem()
     status.pressure = sensor_atmospheric_result.pressure;
 
     // RTC Functions (Prelab 7)
-    rtc_gettime(&status.time);
+    if(rtc_timechanged(&status.time))
+    {
+        rtc_gettime(&status.time);
+        pollData = 1;
+    }
     processUART(&timeToEnter);
 
     if(timeSetState == DONE_SETTING) // note: this means user has already set the rate i.e. already finished configuring everything since it's the last step
     {
-        writeSD(status.time.min, status.time.hour, status.time.date, status.time.month, status.time.year
-                , light_reading, status.outdoor_temperature, status.outdoor_humidity, status.pressure);
+        if(pollData)
+        {
+            writeSD(status.time.min, status.time.hour, status.time.date, status.time.month, status.time.year
+                    , light_reading, status.outdoor_temperature, status.outdoor_humidity, status.pressure);
+            pollData = 0;
+        }
     }
 }
 
