@@ -136,6 +136,7 @@ void SysTick_ISR(void) {
 
 enum TimeSetState { NOT_SETTING, SETTING_MONTH, SETTING_DAY, SETTING_YEAR, SETTING_HOUR, SETTING_MINUTE, SETTING_RATE, DONE_SETTING };
 enum TimeSetState timeSetState = NOT_SETTING;
+
 char UARTBuffer[256] = {'\0'};
 char newInput[256] = {'\0'};
 int newInputReceived = 0;
@@ -250,7 +251,17 @@ void processUART(struct rtc_time* time)
                 break;
             case SETTING_RATE: // rate to collect data
                 // TODO Implement this feature to set the rate of data collection
-                sscanf(newInput, "%d", &time->sec);
+                int interval;
+                sscanf(newInput, "%d", &interval);
+                rtc_setinterval(interval);
+                if(rtc_getinterval() == POLL_MINUTE)
+                {
+                    MAP_RTC_C_setCalendarEvent(RTC_C_CALENDAREVENT_MINUTECHANGE);
+                }
+                if(rtc_getinterval() == POLL_HOUR)
+                {
+                    MAP_RTC_C_setCalendarEvent(RTC_C_CALENDAREVENT_HOURCHANGE);
+                }
                 printf("\n\rTime set.\n\r");
                 break;
 
