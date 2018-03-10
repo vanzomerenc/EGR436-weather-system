@@ -7,11 +7,12 @@
 #include "drv/adc/adc.h"
 #include "drv/i2c/i2c.h"
 #include "sensors/atmospheric.h"
-#include "rtc.h"
+#include "drv/rtc.h"
 #include "weather_station_status.h"
 #include "gui/weather_station_ui.h"
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
+#include "transmitter.h"
 
 #define IS_OUTSIDE // ST 3-6-2018 Comment this out for the indoor module if naming conflicts occur
 #ifdef IS_OUTSIDE
@@ -50,7 +51,7 @@ void initOutSystem()
     initUART();
     rtc_init();
     initSD();
-
+    transmitterInit();
     printf("Press enter to set the time.\n");
 }
 
@@ -85,6 +86,7 @@ void runOutSystem()
             pollData = 0;
         }
     }
+    transmitterRoutine();
 }
 
 

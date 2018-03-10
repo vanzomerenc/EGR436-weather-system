@@ -1,3 +1,6 @@
+#ifndef RECEIVER_H_
+#define RECEIVER_H_
+
 /* DriverLib Includes */
 #include "driverlib.h"
 
@@ -5,14 +8,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <drv/msprf24.h>
+#include <drv/nrf24/msprf24.h>
 volatile unsigned int user;
 
-char buf[32];
+uint8_t buff[32];
 
 void receiverInit()
 {
-    char addr[5];
+    uint8_t addr[5];
     msprf24_open_pipe(0, 1);  // Open pipe#0 with Enhanced ShockBurst
 
     // Set our RX address
@@ -41,13 +44,13 @@ void receiverRoutine()
         msprf24_get_irq_reason();
     }
     if (rf_irq & RF24_IRQ_RX) {
-        r_rx_payload(32, buf);
+        r_rx_payload(32, buff);
         msprf24_irq_clear(RF24_IRQ_RX);
-        user = buf[0];
+        user = buff[0];
 
-        if (buf[0] == '0')
+        if (buff[0] == '0')
             P2OUT &= ~BIT0;
-        if (buf[0] == '1')
+        if (buff[0] == '1')
             P2OUT |= BIT0;
 
     } else {
@@ -55,4 +58,4 @@ void receiverRoutine()
     }
 }
 
-
+#endif // RECEIVER_H_

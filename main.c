@@ -14,15 +14,17 @@
 #include "gui/gui_layout.h"
 #include "gui/embedded_gui.h"
 #include "sensors/light_level.h"
+#include "outsystem.h"
+#include "receiver.h"
 
-
+#define INSIDE_MODULE // comment this out for outside module
 
 int main(void)
 {
     init_clocks();
     expect_frequency(CS_MCLK, 48000000);
     expect_frequency(CS_SMCLK, 24000000);
-
+#ifdef INSIDE_MODULE
     struct adc_channel_config adc_channels[1];
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
@@ -30,8 +32,12 @@ int main(void)
 
     rtc_init(); // prelab 7
     initUART(); // prelab 7
+    receiverInit();
+#else
+    initOutSystem();
+#endif
     Interrupt_enableMaster();
-
+#ifdef INSIDE_MODULE
     struct bme280_dev sensor_atmospheric = {0};
     sensor_atmospheric_init(&sensor_atmospheric);
 
@@ -66,8 +72,10 @@ int main(void)
     //rtc_settime(&status.time);
 
     int lighting_index = 0;
+#endif
     while(1) {  // loop through the test functions to demonstrate the LCD capabilities
-
+#ifdef INSIDE_MODULE
+        receiverRoutine();
         MAP_ADC14_toggleConversionTrigger();
 
         float light_reading = 0;
@@ -94,7 +102,9 @@ int main(void)
         // RTC Functions (Prelab 7)
         rtc_gettime(&status.time);
         processUART(&timeToEnter);
-
+#else
+        runOutSystem();
+#endif
         delay_ms(1000);
     }
 }
