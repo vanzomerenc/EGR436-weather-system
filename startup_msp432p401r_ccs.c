@@ -41,6 +41,7 @@ static void resetISR(void);
 static void nmiISR(void);
 static void faultISR(void);
 static void defaultISR(void);
+static void P2_IRQ(void);
 
 
 /* External declaration for the reset handler that is to be called when the */
@@ -121,7 +122,7 @@ void (* const interruptVectors[])(void) =
     defaultISR,                             /* DMA_INT1 ISR              */
     defaultISR,                             /* DMA_INT0 ISR              */
     defaultISR,                             /* PORT1 ISR                 */
-    defaultISR,                             /* PORT2 ISR                 */
+    P2_IRQ,                             /* PORT2 ISR                 */
     defaultISR,                             /* PORT3 ISR                 */
     defaultISR,                             /* PORT4 ISR                 */
     defaultISR,                             /* PORT5 ISR                 */

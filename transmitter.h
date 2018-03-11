@@ -11,12 +11,15 @@
 #include <stdbool.h>
 
 #include "drv/nrf24/msprf24.h"
+#include "comm.h"
 
-uint8_t buf[32] = {0};
+struct comm_message transmitted_message;
 uint8_t num_retransmits = 0;
 
 void transmitterInit()
 {
+    spi_init();
+
     MAP_GPIO_interruptEdgeSelect(GPIO_PORT_P2, GPIO_PIN5, GPIO_HIGH_TO_LOW_TRANSITION);
     MAP_GPIO_enableInterrupt(GPIO_PORT_P2, GPIO_PIN5);
     MAP_Interrupt_enableInterrupt(INT_PORT2);
@@ -45,33 +48,24 @@ void transmitterInit()
 
 }
 
-void transmitterRoutine()
+void transmitterRoutine(struct sensor_atmospheric_result *atmospheric, float light_level)
 {
-    int i;
-    for(i = 0; i < 3; i++) __delay_cycles(400000);
-    if(buf[0]=='0'){buf[0] = '1';buf[1] = '0';}
-    else {buf[0] = '0';buf[1] = '1';}
-    w_tx_payload(32, buf);
+    comm_encode_sensor_readings(atmospheric, light_level, &transmitted_message);
+    w_tx_payload(32, transmitted_message.data);
     msprf24_activate_tx();
 
-    MAP_PCM_gotoLPM4();
-
-    if(buf[0]=='0')
-    {
-        P2OUT &= ~BIT0;  // Red LED on
-    }
-    else
-    {
-        P2OUT |= BIT0; // Red LED off
-    }
+    while(!(rf_irq & RF24_IRQ_FLAGGED))
+        ;
 
     if (rf_irq & RF24_IRQ_FLAGGED) {
         msprf24_get_irq_reason();
         if (rf_irq & RF24_IRQ_TXFAILED){
             P2OUT &= ~BIT1; // Green LED off
+            P2OUT |= BIT0; // Red LED on
         }
         else
         {
+            P2OUT &= ~BIT0;
             P2OUT |= BIT1; // Green LED on
         }
 

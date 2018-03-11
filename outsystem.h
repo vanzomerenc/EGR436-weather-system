@@ -60,7 +60,8 @@ void runOutSystem()
 {
     MAP_ADC14_toggleConversionTrigger();
     int pollData = 0;
-    int16_t light_reading = 0;
+    float light_reading = 0;
+    sensor_light_level_read(&light_reading);
     adc_get_single_raw(0, &light_reading);
 
     struct sensor_atmospheric_result sensor_atmospheric_result = {0};
@@ -86,7 +87,7 @@ void runOutSystem()
             pollData = 0;
         }
     }
-    transmitterRoutine();
+    transmitterRoutine(&sensor_atmospheric_result, light_reading);
 }
 
 

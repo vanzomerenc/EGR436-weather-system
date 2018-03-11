@@ -71,18 +71,6 @@ void initInSystem()
 void runInSystem()
 {
     receiverRoutine();
-    MAP_ADC14_toggleConversionTrigger();
-
-    float light_reading = 0;
-    sensor_light_level_read(&light_reading);
-
-    if(light_reading < 100) {status.lighting = 0;}
-    else if(light_reading < 300) {status.lighting = 1;}
-    else if(light_reading < 1000) {status.lighting = 2;}
-    else if(light_reading < 3000) {status.lighting = 3;}
-    else {status.lighting = 4;}
-
-    draw_weather_station_ui(status);
 
     struct sensor_atmospheric_result sensor_atmospheric_result = {0};
     sensor_atmospheric_read(&sensor_atmospheric, &sensor_atmospheric_result);
@@ -90,9 +78,22 @@ void runInSystem()
     status.indoor_temperature = sensor_atmospheric_result.temperature;
     status.pressure = sensor_atmospheric_result.pressure;
 
+    status.outdoor_humidity = received_atmospheric_reading.humidity;
+    status.outdoor_temperature = received_atmospheric_reading.temperature;
+
+
+    float light_reading = received_light;
+    if(light_reading < 100) {status.lighting = 0;}
+    else if(light_reading < 300) {status.lighting = 1;}
+    else if(light_reading < 1000) {status.lighting = 2;}
+    else if(light_reading < 3000) {status.lighting = 3;}
+    else {status.lighting = 4;}
+
     // RTC Functions (Prelab 7)
     rtc_gettime(&status.time);
     processUART(&timeToEnter);
+
+    draw_weather_station_ui(status);
 }
 
 
