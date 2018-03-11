@@ -9,6 +9,7 @@
 // modified by RWB 2/9/2018
 
 #include <drv/i2c/i2c.h>
+#include "driverlib.h"
 #include <stdint.h>
 #include "msp.h"
 
@@ -16,7 +17,9 @@
 /* configure UCB1 as I2C */
 void I2C_Init(void) {
 
+    MAP_GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P6, GPIO_PIN4 | GPIO_PIN5);
     UCB1CTLW0 = 0x0001;  // hold the eUSCI module in reset mode
+    delay_ms(100);
     // configure UCB1CTLW0 for:
     // bit15      UCA10 = 0; own address is 7-bit address
     // bit14      UCSLA10 = 0; address slave with 7-bit address
@@ -53,24 +56,43 @@ int I2C_WRITE_STRING(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint
     if (byteCount <= 0)
         return -1;              /* no write was performed */
 
+    int timeout;
+
     EUSCI_B1->I2CSA = dev_addr;      /* setup slave address */
     EUSCI_B1->CTLW0 |= 0x0010;       /* enable transmitter */
     EUSCI_B1->CTLW0 |= 0x0002;       /* generate START and send slave address */
-    while((EUSCI_B1->CTLW0 & 2));    /* wait until slave address is sent */
+
+    timeout = I2C_TIMEOUT;
+    while((EUSCI_B1->CTLW0 & 2) && timeout--);    /* wait until slave address is sent */
+    if(!timeout) goto failed_transmission;
+
     EUSCI_B1->TXBUF = reg_addr;       /* send memory address to slave */
 
     /* send data one byte at a time */
     do {
-        while(!(EUSCI_B1->IFG & 2));     /* wait till it's ready to transmit */
+        timeout = I2C_TIMEOUT;
+        while(!(EUSCI_B1->IFG & 2) && timeout--);     /* wait till it's ready to transmit */
+        if(!timeout) goto failed_transmission;
+
         EUSCI_B1->TXBUF = *reg_data++;   /* send data to slave */
         byteCount--;
      } while (byteCount > 0);
 
-    while(!(EUSCI_B1->IFG & 2));      /* wait till last transmit is done */
+    timeout = I2C_TIMEOUT;
+    while(!(EUSCI_B1->IFG & 2) && timeout--);      /* wait till last transmit is done */
+    if(!timeout) goto failed_transmission;
+
     EUSCI_B1->CTLW0 |= 0x0004;        /* send STOP */
-    while(EUSCI_B1->CTLW0 & 4) ;      /* wait until STOP is sent */
+
+    timeout = I2C_TIMEOUT;
+    while(EUSCI_B1->CTLW0 & 4 && timeout--);      /* wait until STOP is sent */
+    if(!timeout) goto failed_transmission;
 
     return 0;                   /* no error */
+
+failed_transmission:
+    EUSCI_B1->CTLW0 |= 0x0004;        /* send STOP */
+    return -1;
 }
 
 /*
@@ -82,27 +104,49 @@ int I2C_WRITE_READ_STRING(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data,
     if (byteCount <= 0)
         return -1;              /* no read was performed */
 
+    int timeout;
+
     EUSCI_B1->I2CSA = dev_addr;     /* setup slave address */
     EUSCI_B1->CTLW0 |= 0x0010;      /* enable transmitter */
     EUSCI_B1->CTLW0 |= 0x0002;      /* generate START and send slave address */
-    while((EUSCI_B1->CTLW0 & 2));   /* wait until slave address is sent */
+
+    timeout = I2C_TIMEOUT;
+    while((EUSCI_B1->CTLW0 & 2) && timeout--);   /* wait until slave address is sent */
+    if(!timeout) goto failed_transmission;
+
     EUSCI_B1->TXBUF = reg_addr;     /* send memory address to slave */
+
+    timeout = I2C_TIMEOUT;
     while(!(EUSCI_B1->IFG & 2));    /* wait till last transmit is done */
+    if(!timeout) goto failed_transmission;
+
     EUSCI_B1->CTLW0 &= ~0x0010;     /* enable receiver */
     EUSCI_B1->CTLW0 |= 0x0002;      /* generate RESTART and send slave address */
+
+    timeout = I2C_TIMEOUT;
     while(EUSCI_B1->CTLW0 & 2);     /* wait till RESTART is finished */
+    if(!timeout) goto failed_transmission;
 
     /* receive data one byte at a time */
     do {
         if (byteCount == 1)     /* when only one byte of data is left */
             EUSCI_B1->CTLW0 |= 0x0004; /* setup to send STOP after the last byte is received */
 
+        timeout = I2C_TIMEOUT;
         while(!(EUSCI_B1->IFG & 1));    /* wait till data is received */
+        if(!timeout) goto failed_transmission;
+
         *reg_data++ = EUSCI_B1->RXBUF;  /* read the received data */
         byteCount--;
     } while (byteCount);
 
+    timeout = I2C_TIMEOUT;
     while(EUSCI_B1->CTLW0 & 4) ;      /* wait until STOP is sent */
+    if(!timeout) goto failed_transmission;
 
     return 0;                   /* no error */
+
+failed_transmission:
+    EUSCI_B1->CTLW0 |= 0x0004;        /* send STOP */
+    return -1;
 }

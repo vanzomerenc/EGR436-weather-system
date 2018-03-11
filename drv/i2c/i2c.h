@@ -10,6 +10,8 @@
 
 void I2C_Init(void);
 
+#define I2C_TIMEOUT 10000
+
 #include <stdint.h>
 
 int I2C_WRITE_STRING(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t byteCount);
