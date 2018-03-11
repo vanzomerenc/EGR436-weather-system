@@ -117,14 +117,14 @@ int I2C_WRITE_READ_STRING(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data,
     EUSCI_B1->TXBUF = reg_addr;     /* send memory address to slave */
 
     timeout = I2C_TIMEOUT;
-    while(!(EUSCI_B1->IFG & 2));    /* wait till last transmit is done */
+    while(!(EUSCI_B1->IFG & 2) && timeout--);    /* wait till last transmit is done */
     if(!timeout) goto failed_transmission;
 
     EUSCI_B1->CTLW0 &= ~0x0010;     /* enable receiver */
     EUSCI_B1->CTLW0 |= 0x0002;      /* generate RESTART and send slave address */
 
     timeout = I2C_TIMEOUT;
-    while(EUSCI_B1->CTLW0 & 2);     /* wait till RESTART is finished */
+    while(EUSCI_B1->CTLW0 & 2 && timeout--);     /* wait till RESTART is finished */
     if(!timeout) goto failed_transmission;
 
     /* receive data one byte at a time */
@@ -133,7 +133,7 @@ int I2C_WRITE_READ_STRING(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data,
             EUSCI_B1->CTLW0 |= 0x0004; /* setup to send STOP after the last byte is received */
 
         timeout = I2C_TIMEOUT;
-        while(!(EUSCI_B1->IFG & 1));    /* wait till data is received */
+        while(!(EUSCI_B1->IFG & 1) && timeout--);    /* wait till data is received */
         if(!timeout) goto failed_transmission;
 
         *reg_data++ = EUSCI_B1->RXBUF;  /* read the received data */
@@ -141,7 +141,7 @@ int I2C_WRITE_READ_STRING(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data,
     } while (byteCount);
 
     timeout = I2C_TIMEOUT;
-    while(EUSCI_B1->CTLW0 & 4) ;      /* wait until STOP is sent */
+    while(EUSCI_B1->CTLW0 & 4 && timeout--) ;      /* wait until STOP is sent */
     if(!timeout) goto failed_transmission;
 
     return 0;                   /* no error */
