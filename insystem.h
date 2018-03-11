@@ -34,7 +34,6 @@ void initInSystem()
     initUART(); // prelab 7
     receiverInit();
 
-    struct bme280_dev sensor_atmospheric = {0};
     sensor_atmospheric_init(&sensor_atmospheric);
 
     ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
