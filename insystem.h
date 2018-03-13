@@ -80,6 +80,11 @@ void runInSystem()
     status.outdoor_humidity = received_atmospheric_reading.humidity;
     status.outdoor_temperature = received_atmospheric_reading.temperature;
 
+    if(received_time_valid)
+    {
+        rtc_settime(&received_time);
+        received_time_valid = false;
+    }
 
     float light_reading = received_light;
     if(light_reading < 100) {status.lighting = 0;}

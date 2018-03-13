@@ -16,6 +16,7 @@
 static struct comm_message received_message;
 
 struct rtc_time received_time;
+bool received_time_valid = false;
 struct sensor_atmospheric_result received_atmospheric_reading;
 float received_light;
 
@@ -60,23 +61,29 @@ void receiverRoutine()
         msprf24_get_irq_reason();
         delay_ms(10);
         if (rf_irq & RF24_IRQ_RX) {
-            r_rx_payload(32, received_message.data);
             msprf24_irq_clear(RF24_IRQ_RX);
-            switch(received_message.data[0])
+            while(msprf24_rx_pending())
             {
-            case COMM_MESSAGE_RTC_TIME:
-                comm_decode_rtc_time(&received_message, &received_time);
-                break;
-            case COMM_MESSAGE_SENSORS:
-                comm_decode_sensor_readings(&received_message, &received_atmospheric_reading, &received_light);
-                break;
-            default:
-                break;
+                r_rx_payload(32, received_message.data);
+                switch(received_message.data[0])
+                {
+                case COMM_MESSAGE_RTC_TIME:
+                    comm_decode_rtc_time(&received_message, &received_time);
+                    received_time_valid = true;
+                    break;
+                case COMM_MESSAGE_SENSORS:
+                    comm_decode_sensor_readings(&received_message, &received_atmospheric_reading, &received_light);
+                    break;
+                default:
+                    break;
+                }
             }
-
             P2OUT ^= BIT0;
         }
-        msprf24_irq_clear(rf_irq);
+        else
+        {
+            msprf24_irq_clear(rf_irq);
+        }
     }
 }
 
