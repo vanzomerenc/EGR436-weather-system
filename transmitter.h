@@ -36,11 +36,8 @@ void transmitterInit()
 
     msprf24_set_pipe_packetsize(0, 32);
     msprf24_open_pipe(0, 1);
-
     msprf24_standby();
 
-    //char *const rx_addr = "\xde\xad\xbe\xef";
-    //char *const rx_addr = "\x15\x77\x42\xAF\x95";
     uint8_t rx_addr[5] = {'B', 'E', 'A', 'N', 'S'};
 
     w_tx_addr(rx_addr);

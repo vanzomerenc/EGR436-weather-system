@@ -23,6 +23,11 @@ void receiverInit()
 {
     spi_init();
 
+    MAP_GPIO_interruptEdgeSelect(GPIO_PORT_P2, GPIO_PIN5, GPIO_HIGH_TO_LOW_TRANSITION);
+    MAP_GPIO_enableInterrupt(GPIO_PORT_P2, GPIO_PIN5);
+    MAP_Interrupt_enableInterrupt(INT_PORT2);
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0 | GPIO_PIN1);
+
     rf_crc = RF24_EN_CRC | RF24_CRCO; // CRC enabled, 16-bit
     rf_addr_width      = 5;
     rf_speed_power     = RF24_SPEED_1MBPS | RF24_POWER_0DBM;
@@ -30,27 +35,23 @@ void receiverInit()
 
     msprf24_init();
 
-    char addr[5];
+    while(!msprf24_is_alive()) {}
+
+    msprf24_set_pipe_packetsize(0, 32);
     msprf24_open_pipe(0, 1);  // Open pipe#0 with Enhanced ShockBurst
+    msprf24_standby();
 
     // Set our RX address
-    //addr[0] = 0xDE; addr[1] = 0xAD; addr[2] = 0xBE; addr[3] = 0xEF; addr[4] = 0x00;
-    addr[0] = 'B'; addr[1] = 'E'; addr[2] = 'A'; addr[3] = 'N'; addr[4] = 'S';
-    w_rx_addr(0, addr);
+    uint8_t rx_addr[5] = {'B', 'E', 'A', 'N', 'S'};
+    w_rx_addr(0, rx_addr);
 
     // Receive mode
     if (!(RF24_QUEUE_RXEMPTY & msprf24_queue_state())) {
         flush_rx();
     }
 
-    GPIO_interruptEdgeSelect (GPIO_PORT_P2, GPIO_PIN5, GPIO_HIGH_TO_LOW_TRANSITION );
-    MAP_GPIO_enableInterrupt(GPIO_PORT_P2, GPIO_PIN5);
-    MAP_Interrupt_enableInterrupt(INT_PORT2);
-    Interrupt_enableMaster();
     msprf24_activate_rx();
     msprf24_irq_clear(RF24_IRQ_RX);
-
-    int isAlive = msprf24_is_alive();
 }
 
 void receiverRoutine()
