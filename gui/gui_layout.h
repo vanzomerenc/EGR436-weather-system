@@ -35,18 +35,23 @@
 
 #define OUTSIDE_TEMPERATURE_LABEL_POS (struct text_placement) {OUTSIDE_LABEL_COL, TEMPERATURE_ROW, 1}
 #define OUTSIDE_TEMPERATURE_VALUE_POS (struct text_placement) {OUTSIDE_VALUE_COL, TEMPERATURE_ROW, 2}
+#define OUTSIDE_TEMPERATURE_TREND_POS (struct text_placement) {OUTSIDE_LABEL_COL + 2, TEMPERATURE_ROW, 2}
 
 #define INSIDE_TEMPERATURE_LABEL_POS  (struct text_placement) {INSIDE_LABEL_COL, TEMPERATURE_ROW, 1}
 #define INSIDE_TEMPERATURE_VALUE_POS  (struct text_placement) {INSIDE_VALUE_COL, TEMPERATURE_ROW, 2}
+#define INSIDE_TEMPERATURE_TREND_POS  (struct text_placement) {INSIDE_LABEL_COL + 2, TEMPERATURE_ROW, 2}
 
 #define OUTSIDE_HUMIDITY_LABEL_POS    (struct text_placement) {OUTSIDE_LABEL_COL, HUMIDITY_ROW, 1}
 #define OUTSIDE_HUMIDITY_VALUE_POS    (struct text_placement) {OUTSIDE_VALUE_COL, HUMIDITY_ROW, 2}
+#define OUTSIDE_HUMIDITY_TREND_POS    (struct text_placement) {OUTSIDE_LABEL_COL + 2, HUMIDITY_ROW, 2}
 
 #define INSIDE_HUMIDITY_LABEL_POS     (struct text_placement) {INSIDE_LABEL_COL, HUMIDITY_ROW, 1}
 #define INSIDE_HUMIDITY_VALUE_POS     (struct text_placement) {INSIDE_VALUE_COL, HUMIDITY_ROW, 2}
+#define INSIDE_HUMIDITY_TREND_POS     (struct text_placement) {INSIDE_LABEL_COL + 2, HUMIDITY_ROW, 2}
 
 #define BAROMETER_LABEL_POS           (struct text_placement) {16, BAROMETER_ROW, 1}
 #define BAROMETER_VALUE_POS           (struct text_placement) {5, BAROMETER_ROW, 2}
+#define BAROMETER_TREND_POS           (struct text_placement) {2, BAROMETER_ROW, 2}
 
 
 #endif /* GUI_LAYOUT_H_ */
