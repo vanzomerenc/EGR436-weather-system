@@ -8,6 +8,8 @@
 #ifndef SENSORS_ATMOSPHERIC_H_
 #define SENSORS_ATMOSPHERIC_H_
 
+#define PRESSURE_ALTITUDE_CORRECTION 0.64 // @ 600 ft above sea level
+
 #include "drv/BME280/bme280.h"
 
 struct sensor_atmospheric_result

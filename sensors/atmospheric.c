@@ -46,7 +46,7 @@ int sensor_atmospheric_read(struct bme280_dev *dev, struct sensor_atmospheric_re
     struct bme280_data sensor_data = {0};
     int8_t err = bme280_get_sensor_data(BME280_ALL, &sensor_data, dev);
 
-    out_result->pressure = sensor_data.pressure * 0.000002953;
+    out_result->pressure = sensor_data.pressure * 0.000002953 + PRESSURE_ALTITUDE_CORRECTION;
     out_result->temperature = (sensor_data.temperature * 0.01) * (9.0 / 5.0) + 32.0;
     out_result->humidity = sensor_data.humidity * (1.0 / 1024.0);
 
