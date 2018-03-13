@@ -34,14 +34,24 @@ int draw_weather_station_ui(struct weather_station_status status)
 
     gui_draw(LIGHTING_ICON_POS, images[status.lighting]);
     GUI_PRINT_FORMATTED(TIME_TEXT_POS, "%02d:%02d", status.time.hour, status.time.min);
-    GUI_PRINT_FORMATTED(DATE_TEXT_POS, "%02d/%02d/%04d", status.time.month, status.time.date, status.time.year);
+    GUI_PRINT_FORMATTED(DATE_TEXT_POS, "%02d/%02d", status.time.month, status.time.date);
     gui_print(OUTSIDE_HEADER_TEXT_POS, "OUTSIDE");
     gui_print(INSIDE_HEADER_TEXT_POS, "INSIDE");
-    GUI_PRINT_FORMATTED(OUTSIDE_TEMPERATURE_TEXT_POS, "%2.f\xa7", status.outdoor_temperature);
-    GUI_PRINT_FORMATTED(INSIDE_TEMPERATURE_TEXT_POS, "%2.f\xa7", status.indoor_temperature);
-    GUI_PRINT_FORMATTED(OUTSIDE_HUMIDITY_TEXT_POS, "%2.f%%", status.outdoor_humidity);
-    GUI_PRINT_FORMATTED(INSIDE_HUMIDITY_TEXT_POS, "%2.f%%", status.indoor_humidity);
-    GUI_PRINT_FORMATTED(BAROMETER_TEXT_POS, "%2.1f \"Hg", status.pressure);
+
+    GUI_PRINT_FORMATTED(OUTSIDE_TEMPERATURE_VALUE_POS, "%2.f", status.outdoor_temperature);
+    gui_print(OUTSIDE_TEMPERATURE_LABEL_POS, "\xa7""F");
+
+    GUI_PRINT_FORMATTED(INSIDE_TEMPERATURE_VALUE_POS, "%2.f", status.indoor_temperature);
+    gui_print(INSIDE_TEMPERATURE_LABEL_POS, "\xa7""F");
+
+    GUI_PRINT_FORMATTED(OUTSIDE_HUMIDITY_VALUE_POS, "%2.f", status.outdoor_humidity);
+    gui_print(OUTSIDE_HUMIDITY_LABEL_POS, "%");
+
+    GUI_PRINT_FORMATTED(INSIDE_HUMIDITY_VALUE_POS, "%2.f", status.indoor_humidity);
+    gui_print(INSIDE_HUMIDITY_LABEL_POS, "%");
+
+    GUI_PRINT_FORMATTED(BAROMETER_VALUE_POS, "%2.2f", status.pressure);
+    gui_print(BAROMETER_LABEL_POS, "inHg");
 
     prev_status = status;
 
