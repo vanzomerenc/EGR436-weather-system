@@ -5,13 +5,15 @@
 #include "outsystem.h"
 #include "insystem.h"
 
-#define INSIDE_MODULE // comment this out for outside module
+//#define INSIDE_MODULE // comment this out for outside module
 
 int main(void)
 {
     init_clocks();
     expect_frequency(CS_MCLK, 48000000);
     expect_frequency(CS_SMCLK, 24000000);
+    rtc_init();
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
     Interrupt_enableMaster();
 
 #ifdef INSIDE_MODULE
@@ -25,7 +27,12 @@ int main(void)
 #else
         runOutSystem();
 #endif
-        delay_ms(1000);
+        while(!rtc_second_passed)
+        {
+            MAP_PCM_gotoLPM0();
+        }
+        rtc_second_passed = false;
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
     }
 }
 
