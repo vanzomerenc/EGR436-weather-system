@@ -30,7 +30,6 @@ void initInSystem()
     adc_init(1, adc_channels);
     sensor_light_level_init();
 
-    rtc_init(); // prelab 7
     initUART(); // prelab 7
     receiverInit();
 
@@ -89,7 +88,6 @@ void runInSystem()
     else if(light_reading < 3000) {status.lighting = 3;}
     else {status.lighting = 4;}
 
-    // RTC Functions (Prelab 7)
     rtc_gettime(&status.time);
     processUART(&timeToEnter);
 

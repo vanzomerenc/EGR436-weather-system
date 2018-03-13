@@ -17,16 +17,14 @@ struct rtc_time
 
 enum IntervalSetting { POLL_SECOND, POLL_MINUTE, POLL_HOUR };
 
-extern char const * const rtc_day_name[8];
+extern volatile bool rtc_minute_passed;
+extern volatile bool rtc_second_passed;
 
 int rtc_timechanged(struct rtc_time *current);
 void rtc_init();
 void rtc_gettime(struct rtc_time *result);
 void rtc_settime(struct rtc_time *time);
-void rtc_gettemp(float *result);
-void rtc_format(struct rtc_time *time, char *result, size_t length);
 int rtc_getinterval();
 void rtc_setinterval(int setting);
 
-//int rtc_decToHex(int dec);
 #endif // RTC_H_

@@ -1,5 +1,11 @@
 #include "rtc.h"
 
+#include <stdbool.h>
+
+
+volatile bool rtc_minute_passed = false;
+volatile bool rtc_second_passed = false;
+
 /* Statics */
 // @NOTE ST 2-19-2018 This is what gets updated by the MSP432's RTC
 static volatile RTC_C_Calendar newTime;
@@ -40,10 +46,9 @@ void rtc_setinterval(int setting)
 
 void rtc_init()
 {
-    /* Configuring pins for peripheral/crystal usage and LED for output */
+    /* Configuring pins for peripheral/crystal usage */
     MAP_GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ,
             GPIO_PIN0 | GPIO_PIN1, GPIO_PRIMARY_MODULE_FUNCTION);
-    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
 
     /* Initializing RTC with current time as described in time in
          * definitions section */
@@ -122,16 +127,6 @@ void rtc_settime(struct rtc_time *time)
     MAP_RTC_C_startClock();
 }
 
-void rtc_gettemp(float *result)
-{
-
-}
-
-void rtc_format(struct rtc_time *time, char *result, size_t length)
-{
-
-}
-
 /* RTC ISR */
 void RTC_C_IRQHandler(void)
 {
@@ -142,12 +137,11 @@ void RTC_C_IRQHandler(void)
 
     if (status & RTC_C_CLOCK_READ_READY_INTERRUPT)
     {
-        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
-        // For testing...
         if(pollIntervalSetting == POLL_SECOND)
         {
             newTime = MAP_RTC_C_getCalendarTime();
         }
+        rtc_second_passed = true;
     }
 
     if (status & RTC_C_TIME_EVENT_INTERRUPT)
@@ -155,13 +149,14 @@ void RTC_C_IRQHandler(void)
         /* Interrupts every minute - Set breakpoint here */
         __no_operation();
         newTime = MAP_RTC_C_getCalendarTime();
-
+        rtc_minute_passed = true;
     }
 
     if (status & RTC_C_CLOCK_ALARM_INTERRUPT)
     {
         __no_operation();
     }
+    MAP_Interrupt_disableSleepOnIsrExit();
 
 }
 

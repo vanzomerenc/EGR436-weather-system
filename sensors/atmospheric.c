@@ -17,10 +17,6 @@
 
 int sensor_atmospheric_init(struct bme280_dev *out_dev)
 {
-    MAP_GPIO_setAsOutputPin(GPIO_PORT_P4, GPIO_PIN6);
-    MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN6);
-    delay_ms(100);
-
     I2C_Init();
 
     *out_dev = (struct bme280_dev)

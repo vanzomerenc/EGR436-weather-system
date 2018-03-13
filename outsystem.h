@@ -42,14 +42,12 @@ void initOutSystem()
     struct adc_channel_config adc_channels[1];
     adc_channels[0] = (struct adc_channel_config){.input_id = 0, .is_high_range = true};
     adc_init(1, adc_channels);
-    rtc_init(); // prelab 7
     initUART(); // prelab 7
 
     sensor_atmospheric_init(&sensor_atmospheric);
 
     //ST7735_InitR(INITR_REDTAB); // initialize LCD controller IC
     initUART();
-    rtc_init();
     initSD();
     transmitterInit();
     printf("Press enter to set the time.\n");
