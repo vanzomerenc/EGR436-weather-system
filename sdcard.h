@@ -129,8 +129,6 @@ StringFromFResult(FRESULT iFResult) {
 void SysTick_ISR(void) {
     // Call the FatFs tick timer.
     disk_timerproc();
-
-    GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
 }
 
 
@@ -192,12 +190,9 @@ void EusciA0_ISR(void)
             strcat(UARTBuffer, tempS);
         }
     }
-    GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
     /* Echo back. */
     EUSCI_A_UART_transmitData(EUSCI_A0_BASE, receiveByte);
-
-    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
 }
 
 // For tera term communication using the UART backchannel
