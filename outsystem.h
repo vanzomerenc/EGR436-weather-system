@@ -60,7 +60,6 @@ void runOutSystem()
     int pollData = 0;
     float light_reading = 0;
     sensor_light_level_read(&light_reading);
-    adc_get_single_raw(0, &light_reading);
 
     struct sensor_atmospheric_result sensor_atmospheric_result = {0};
     sensor_atmospheric_read(&sensor_atmospheric, &sensor_atmospheric_result);
