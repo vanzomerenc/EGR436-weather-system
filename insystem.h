@@ -80,12 +80,6 @@ void runInSystem()
     status.outdoor_humidity = received_atmospheric_reading.humidity;
     status.outdoor_temperature = received_atmospheric_reading.temperature;
 
-    if(received_time_valid)
-    {
-        rtc_settime(&received_time);
-        received_time_valid = false;
-    }
-
     float light_reading = received_light;
     if(light_reading < 100) {status.lighting = 0;}
     else if(light_reading < 300) {status.lighting = 1;}
@@ -97,6 +91,19 @@ void runInSystem()
     processUART(&timeToEnter);
 
     draw_weather_station_ui(status);
+
+    if(received_time_valid)
+    {
+        if(received_time.min != status.time.min
+            || received_time.hour != status.time.hour
+            || received_time.date != status.time.date
+            || received_time.month != status.time.month
+            || received_time.year != status.time.year)
+        {
+            rtc_settime(&received_time);
+        }
+        received_time_valid = false;
+    }
 }
 
 
