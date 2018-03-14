@@ -23,27 +23,29 @@ static uint16_t const *const images[5] =
 };
 
 
-static struct weather_station_status trend_old_values = {0};
-static int trend_countdowns[5] = {0};
-void draw_trend(struct text_placement location, float *old, float new, float eps, int index)
+static struct weather_station_status short_run_avg = {0};
+static float const short_run_alpha = 2/(SHORT_RUN_AVG_N_SAMPLES + 1.0);
+
+static struct weather_station_status long_run_avg = {0};
+static float const long_run_alpha = 2/(LONG_RUN_AVG_N_SAMPLES + 1.0);
+
+
+void draw_trend(struct text_placement location, float new, float *short_run_avg, float *long_run_avg, float eps)
 {
     if(new == 0) {return;}
-    if(*old == 0) {*old = new; return;}
-    if(new - *old > eps)
+    if(*short_run_avg == 0) {*short_run_avg = new;}
+    if(*long_run_avg == 0) {*long_run_avg = new;}
+
+    *short_run_avg = *short_run_avg * (1 - short_run_alpha) + new * short_run_alpha;
+    *long_run_avg = *long_run_avg * (1 - long_run_alpha) + new * long_run_alpha;
+
+    if(*short_run_avg - *long_run_avg > eps)
     {
         gui_print(location, "\x1E");
-        *old = new;
-        trend_countdowns[index] = 10;
     }
-    else if(new - *old < -eps)
+    else if(*short_run_avg - *long_run_avg < -eps)
     {
         gui_print(location, "\x1F");
-        *old = new;
-        trend_countdowns[index] = 10;
-    }
-    else if(trend_countdowns[index] > 0)
-    {
-        trend_countdowns[index]--;
     }
     else
     {
@@ -61,23 +63,23 @@ int draw_weather_station_ui(struct weather_station_status status)
 
     GUI_PRINT_FORMATTED(OUTSIDE_TEMPERATURE_VALUE_POS, "%2.f", status.outdoor_temperature);
     gui_print(OUTSIDE_TEMPERATURE_LABEL_POS, "\xF7""F");
-    draw_trend(OUTSIDE_TEMPERATURE_TREND_POS, &trend_old_values.outdoor_temperature, status.outdoor_temperature, 1.0f, 0);
+    draw_trend(OUTSIDE_TEMPERATURE_TREND_POS, status.outdoor_temperature, &short_run_avg.outdoor_temperature, &long_run_avg.outdoor_temperature, 0.5f);
 
     GUI_PRINT_FORMATTED(INSIDE_TEMPERATURE_VALUE_POS, "%2.f", status.indoor_temperature);
     gui_print(INSIDE_TEMPERATURE_LABEL_POS, "\xF7""F");
-    draw_trend(INSIDE_TEMPERATURE_TREND_POS, &trend_old_values.indoor_temperature, status.indoor_temperature, 1.0f, 1);
+    draw_trend(INSIDE_TEMPERATURE_TREND_POS, status.indoor_temperature, &short_run_avg.indoor_temperature, &long_run_avg.indoor_temperature, 0.5f);
 
     GUI_PRINT_FORMATTED(OUTSIDE_HUMIDITY_VALUE_POS, "%2.f", status.outdoor_humidity);
     gui_print(OUTSIDE_HUMIDITY_LABEL_POS, "%");
-    draw_trend(OUTSIDE_HUMIDITY_TREND_POS, &trend_old_values.outdoor_humidity, status.outdoor_humidity, 1.0f, 2);
+    draw_trend(OUTSIDE_HUMIDITY_TREND_POS, status.outdoor_humidity, &short_run_avg.outdoor_humidity, &long_run_avg.outdoor_humidity, 0.5f);
 
     GUI_PRINT_FORMATTED(INSIDE_HUMIDITY_VALUE_POS, "%2.f", status.indoor_humidity);
     gui_print(INSIDE_HUMIDITY_LABEL_POS, "%");
-    draw_trend(INSIDE_HUMIDITY_TREND_POS, &trend_old_values.indoor_humidity, status.indoor_humidity, 1.0f, 3);
+    draw_trend(INSIDE_HUMIDITY_TREND_POS, status.indoor_humidity, &short_run_avg.indoor_humidity, &long_run_avg.indoor_humidity, 0.5f);
 
     GUI_PRINT_FORMATTED(BAROMETER_VALUE_POS, "%2.2f", status.pressure);
     gui_print(BAROMETER_LABEL_POS, "inHg");
-    draw_trend(BAROMETER_TREND_POS, &trend_old_values.pressure, status.pressure, 0.01f, 4);
+    draw_trend(BAROMETER_TREND_POS, status.pressure, &short_run_avg.pressure, &long_run_avg.pressure, 0.01f);
 
     return 0;
 }
