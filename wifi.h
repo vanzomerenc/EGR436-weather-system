@@ -70,14 +70,16 @@ void euscia0_isr(void)
     if(status & EUSCI_A_UART_RECEIVE_INTERRUPT)
     {
         U0RXData = UART_receiveData(EUSCI_A0_BASE);
+        /*
         if(U0RXData == 13)
         {
             MAP_UART_transmitData(EUSCI_A2_BASE, '\r\n');
         }
         else
         {
+        */
             MAP_UART_transmitData(EUSCI_A2_BASE, U0RXData); // send byte out UART2 port
-        }
+        //}
     }
 }
 
