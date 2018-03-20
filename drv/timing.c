@@ -45,8 +45,8 @@ void init_clocks(void)
 	/* Initializing MCLK to HFXT (effectively 48MHz) */
 	MAP_CS_initClockSignal(CS_MCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
 
-	// Initializing SMCLK to its maximum, which is 24MHz
-	MAP_CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_2);
+	// Initializing SMCLK to 12MHz
+	MAP_CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_4);
 
 	_timing_exit_critical_section();
 }
